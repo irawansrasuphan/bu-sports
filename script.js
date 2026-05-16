@@ -26,7 +26,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ข้อมูลอุปกรณ์กีฬาเริ่มต้น */
+/* ข้อมูลอุปกรณ์กีฬาเริ่มต้น (Total จะปรับเปลี่ยนตามแอดมินโดยอัตโนมัติผ่านฐานข้อมูล) */
 let EQUIP = [
   { id: "football", name: "ลูกฟุตบอล", emoji: "⚽", total: 5, out: 0 },
   { id: "volleyball", name: "วอลเลย์บอล", emoji: "🏐", total: 5, out: 0 },
@@ -294,6 +294,7 @@ function listenToFirebaseData() {
     updateStats();
   });
 
+  // ซ่อมฟังก์ชันซิงค์: คอยดึงทั้งจำนวนถูกยืม (out) และยอดคลังรวมจากแอดมินแบบเรียลไทม์เพื่อกันบั๊กบอร์ดค้าง
   onValue(ref(db, "equipmentOut"), (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -339,7 +340,7 @@ function updateStats() {
     sumTotal += e.total;
     sumOut += e.out;
   });
-  const sumAvail = sumTotal - sumOut;
+  const sumAvail = Math.max(0, sumTotal - sumOut);
 
   if (document.getElementById("stat-total"))
     document.getElementById("stat-total").textContent = sumTotal;
@@ -357,8 +358,8 @@ function renderEquip() {
   if (!grid) return;
 
   grid.innerHTML = EQUIP.map((e) => {
-    const avail = e.total - e.out;
-    const percent = (avail / e.total) * 100;
+    const avail = Math.max(0, e.total - e.out);
+    const percent = e.total > 0 ? (avail / e.total) * 100 : 0;
     return `
       <div class="equip-card ${avail <= 0 ? "unavail" : ""}" onclick="window.handleEquipCardClick('${e.id}', ${avail})">
         <div class="eball">${e.emoji}</div>
@@ -387,7 +388,7 @@ window.handleEquipCardClick = function (eid, avail) {
 window.openModal = function (eid) {
   modalEquip = EQUIP.find((e) => e.id === eid);
   if (!modalEquip) return;
-  const avail = modalEquip.total - modalEquip.out;
+  const avail = Math.max(0, modalEquip.total - modalEquip.out);
   document.getElementById("modal-title").textContent =
     `${modalEquip.emoji} ${modalEquip.name}`;
   document.getElementById("modal-avail").textContent = avail;
@@ -580,7 +581,6 @@ window.showSuccess = function (emoji, title, msg) {
   document.getElementById("suc-title").textContent = title;
   document.getElementById("suc-msg").textContent = msg;
 
-  // บังคับแสดงผลโดยการเพิ่มคลาสผ่าน JavaScript ไดนามิก
   overlay.classList.add("open");
 };
 
