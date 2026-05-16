@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Fully Fixed & Functional Version)
+   Sports Lending System - script.js (Fully Updated Version)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -26,14 +26,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ข้อมูลอุปกรณ์กีฬาเริ่มต้น */
+/* ข้อมูลอุปกรณ์กีฬาเริ่มต้น (อัปเดตล่าสุด: แบดมินตัน & เทนนิส) */
 let EQUIP = [
   { id: "football", name: "ลูกฟุตบอล", emoji: "⚽", total: 5, out: 0 },
   { id: "volleyball", name: "วอลเลย์บอล", emoji: "🏐", total: 5, out: 0 },
   { id: "basketball", name: "บาสเกตบอล", emoji: "🏀", total: 5, out: 0 },
   { id: "pingpong", name: "ปิงปอง (แพ็ค)", emoji: "🏓", total: 5, out: 0 },
-  { id: "petanque", name: "เปตอง (ชุด)", emoji: "🔮", total: 5, out: 0 },
-  { id: "takraw", name: "ตะกร้อ", emoji: "🧶", total: 5, out: 0 },
+  { id: "badminton", name: "แบดมินตัน (ไม้)", emoji: "🏸", total: 5, out: 0 },
+  { id: "tennis", name: "เทนนิส", emoji: "🎾", total: 5, out: 0 },
 ];
 
 /* State Management */
@@ -45,6 +45,7 @@ let modalEquip = null;
 let pendingReturnData = null;
 let isOverdueBlocked = false;
 
+// ฟังก์ชันแปลงรูปแบบเวลาสำหรับการแสดงผล
 function fmt(dateString) {
   if (!dateString) return "-";
   const date = new Date(dateString);
@@ -54,11 +55,13 @@ function fmt(dateString) {
   );
 }
 
+// ฟังก์ชันดึงอักษรแรกของชื่อกรณีไม่มีรูปโปรไฟล์
 function initials(name) {
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "?";
 }
 
+// เปิด-ปิดเมนู Sidebar
 window.toggleSidebar = function () {
   const sidebar = document.getElementById("sidebar-menu");
   const overlay = document.getElementById("sidebar-overlay");
@@ -68,6 +71,7 @@ window.toggleSidebar = function () {
   }
 };
 
+// ฟังก์ชันสลับหน้าจอ (Screen Routing)
 window.goTo = function (id) {
   window.scrollTo({ top: 0, behavior: "instant" });
   document
@@ -91,7 +95,9 @@ window.handleOverlayClick = function (event) {
   }
 };
 
-/* Login System */
+/* =========================================================
+   LOGIN & LOGOUT SYSTEM
+========================================================= */
 window.doLogin = async function () {
   const nameInput = document.getElementById("inp-name");
   const idInput = document.getElementById("inp-id");
@@ -163,7 +169,9 @@ window.doLogout = function () {
   goTo("s-login");
 };
 
-/* AVATAR FUNCTIONS */
+/* =========================================================
+   PROFILE AVATAR & MANAGEMENT
+========================================================= */
 window.uploadAvatar = function (event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -248,7 +256,9 @@ window.saveEditedProfile = function () {
   window.showSuccess("📝", "อัปเดตสำเร็จ", "แก้ไขข้อมูลเรียบร้อย");
 };
 
-/* FIREBASE REALTIME SYNC DATA */
+/* =========================================================
+   FIREBASE REALTIME DATABASE SYNC
+========================================================= */
 function saveOnlineData() {
   const equipData = {};
   EQUIP.forEach((item) => {
@@ -283,7 +293,7 @@ function listenToFirebaseData() {
     updateStats();
   });
 
-  // แก้ไข Logic ตรงนี้ให้ทำการอัปเดต local array และ Re-render ทันทีที่มีการยืม/คืน
+  // บล็อกดักฟังยอดการยืมจากเซิร์ฟเวอร์ และเปลี่ยนสถานะ UI ทันทีแบบ Realtime
   onValue(ref(db, "equipmentOut"), (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -322,6 +332,7 @@ function setupUserUI() {
   applyAvatarUI(currentUser.avatar);
 }
 
+// อัปเดตการ์ดสรุปจำนวนอุปกรณ์บนหน้า Dashboard
 function updateStats() {
   let sumTotal = 0;
   let sumOut = 0;
@@ -339,6 +350,9 @@ function updateStats() {
     document.getElementById("stat-avail").textContent = sumAvail;
 }
 
+/* =========================================================
+   BORROW SYSTEM & INTERACTION
+========================================================= */
 function renderEquip() {
   const grid = document.getElementById("equip-grid");
   if (!grid) return;
@@ -421,6 +435,7 @@ window.selDur = function (btn, hour) {
   btn.classList.add("sel");
 };
 
+// ยืนยันกระบวนการยืมอุปกรณ์กีฬา
 window.confirmBorrow = function () {
   if (!modalEquip || modalEquip.out >= modalEquip.total) return;
 
@@ -446,6 +461,7 @@ window.confirmBorrow = function () {
   );
 };
 
+// แสดงรายการยืมในหน้าหลัก Dashboard
 function renderMyBorrows() {
   const container = document.getElementById("my-borrows");
   if (!container) return;
@@ -476,6 +492,9 @@ function renderMyBorrows() {
     .join("");
 }
 
+/* =========================================================
+   RETURN SYSTEM
+========================================================= */
 function renderReturn() {
   const container = document.getElementById("return-list");
   if (!container) return;
@@ -527,7 +546,7 @@ window.closeConfirmModal = function () {
   pendingReturnData = null;
 };
 
-// ฟังก์ชันคืนอุปกรณ์ที่ทำเสร็จสมบูรณ์และลด/เพิ่มจำนวนอัตโนมัติ
+// ประมวลผลและหักลบจำนวนการคืนอุปกรณ์
 window.executeReturn = function () {
   if (!pendingReturnData) return;
   const { equipId, borrowIndex } = pendingReturnData;
@@ -536,7 +555,7 @@ window.executeReturn = function () {
   if (item && item.active) {
     item.active = false;
 
-    // ย้ายเข้าสู่ประวัติการใช้งาน
+    // ย้ายเข้าสู่ประวัติการยืม-คืน
     myHistory.unshift({
       ...item,
       returnedAt: new Date().toISOString(),
@@ -561,7 +580,9 @@ window.executeReturn = function () {
   }
 };
 
-/* Success Overlay Alert Control */
+/* =========================================================
+   GLOBAL ALERTS (SUCCESS POPUP)
+========================================================= */
 window.showSuccess = function (emoji, title, msg) {
   const overlay = document.getElementById("success-overlay");
   if (!overlay) return;
@@ -577,7 +598,7 @@ window.closeSuccess = function () {
   window.goTo("s-home");
 };
 
-// เริ่มต้นตรวจสอบเซสชันผู้ใช้เก่า
+// เริ่มต้นตรวจสอบเซสชันผู้ใช้เก่าเมื่อเปิดหน้าเว็บ
 window.addEventListener("DOMContentLoaded", () => {
   const savedUser = localStorage.getItem("sportsUser");
   if (savedUser) {

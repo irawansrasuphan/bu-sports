@@ -231,13 +231,13 @@
           </div>
           <div class="stat-c">
             <div class="num" id="stat-out" style="color: var(--warning)">0</div>
-            <div class="lab">ยืมไปเท่าไหร่</div>
+            <div class="lab">จำนวนที่ยืม</div>
           </div>
           <div class="stat-c">
             <div class="num" id="stat-avail" style="color: var(--secondary)">
               0
             </div>
-            <div class="lab">เหลือเท่าไหร่</div>
+            <div class="lab">จำนวนที่เหลือ</div>
           </div>
         </div>
 
@@ -293,7 +293,7 @@
     >
       <div class="modal-sheet">
         <div class="modal-handle"></div>
-        <h3 id="modal-title">ลูกฟุตบอล</h3>
+        <h3 id="modal-title">อุปกรณ์กีฬา</h3>
         <p class="modal-sub">เลือกระยะเวลาการยืม (สูงสุด 3 ชั่วโมง)</p>
         <div class="avail-big">
           <div>
@@ -369,7 +369,7 @@
 
     <div class="modal-overlay modal-center-mode" id="confirm-modal">
       <div class="modal-sheet confirm-sheet">
-        <div class="modal-center-icon" id="conf-emoji">🏐</div>
+        <div class="modal-center-icon" id="conf-emoji">🏸</div>
         <h3>ยืนยันการคืนอุปกรณ์?</h3>
         <p id="conf-msg">คุณต้องการคืนอุปกรณ์รายการนี้ใช่หรือไม่?</p>
         <div class="modal-actions">
@@ -411,10 +411,8 @@
         <div class="modal-center-icon">⚠️</div>
         <h3>ไม่สามารถยืมเพิ่มได้!</h3>
         <p>
-          เนื่องจากคุณมีอุปกรณ์ค้างยืมในระบบอยู่<br /><b
-            style="color: var(--danger)"
-            >กรุณาคืนอุปกรณ์กีฬาก่อนยืมอันใหม่</b
-          >
+          เนื่องจากคุณมีอุปกรณ์ค้างยืมในระบบอยู่<br />
+          <b style="color: var(--danger)">กรุณาคืนอุปกรณ์กีฬาก่อนยืมอันใหม่</b>
         </p>
         <button class="btn-warning-ok" onclick="closeLimitModal()">ตกลง</button>
       </div>
