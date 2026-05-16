@@ -79,10 +79,12 @@ window.goTo = function (id) {
   if (id === "s-home") {
     checkOverdueStatus(); // ตรวจสอบการหมดเวลาก่อนแสดงผลหน้าหลัก
     renderMyBorrows();
+    renderHistoryShortcut(); // 🆕 เรนเดอร์ข้อมูลประวัติแบบย่อในหน้าแรก
     updateStats();
   }
   if (id === "s-borrow") renderEquip();
   if (id === "s-return") renderReturn();
+  if (id === "s-history") renderHistory(); // 🆕 เรนเดอร์หน้าประวัติทั้งหมด
 };
 
 /* Login System - ปรับปรุงเพื่อไม่ให้เขียนทับรูปโปรไฟล์เดิมบน Firebase */
@@ -279,6 +281,8 @@ function listenToFirebaseData() {
     checkOverdueStatus(); // ตรวจสอบสถานะการค้างส่งอุปกรณ์แบบเรียลไทม์
     renderMyBorrows();
     renderReturn();
+    renderHistoryShortcut(); // 🆕 อัปเดตข้อมูลทางลัดประวัติหน้าแรกแบบเรียลไทม์
+    renderHistory(); // 🆕 อัปเดตข้อมูลหน้าประวัติหลักแบบเรียลไทม์
     updateStats();
   });
 
@@ -551,6 +555,50 @@ function executeReturn() {
   checkOverdueStatus();
 
   showSuccess("🎉", "คืนอุปกรณ์สำเร็จ!", `ขอบคุณที่ส่งคืนอุปกรณ์เรียบร้อยแล้ว`);
+}
+
+/* 🆕 ฟังก์ชันเรนเดอร์ข้อมูลหน้าจอประวัติการยืม-คืนอุปกรณ์กีฬาหลัก (s-history) */
+function renderHistory() {
+  const container = document.getElementById("history-list");
+  if (!container) return;
+
+  if (myHistory.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="padding: 4rem 1rem;"><i class="ti ti-history" style="font-size: 3.5rem; opacity: 0.4;"></i><p>ยังไม่มีประวัติการทำรายการยืม-คืนอุปกรณ์กีฬา</p></div>`;
+    return;
+  }
+
+  container.innerHTML = myHistory
+    .map((h) => {
+      return `
+      <div class="borrow-item" style="padding: 1rem 0;">
+        <div class="ball-icon" style="background: var(--gray-100); color: var(--gray-700);">${h.emoji}</div>
+        <div class="info">
+          <b>${h.name}</b>
+          <small style="color: var(--gray-500); display: block; margin-top: 0.15rem;">ยืมเมื่อ: ${fmt(h.borrowed)}</small>
+          <small style="color: var(--primary-dark); display: block;">คืนเมื่อ: ${fmt(h.returned)}</small>
+        </div>
+        <span class="badge returned">คืนแล้ว</span>
+      </div>
+    `;
+    })
+    .join("");
+}
+
+/* 🆕 ฟังก์ชันอัปเดต Widget การ์ดทางลัดประวัติหน้าแรก (history-shortcut-card) */
+function renderHistoryShortcut() {
+  const shortcutTitle = document.getElementById("shortcut-title");
+  const shortcutSub = document.getElementById("shortcut-sub");
+
+  if (!shortcutTitle || !shortcutSub) return;
+
+  if (myHistory.length > 0) {
+    const latest = myHistory[0];
+    shortcutTitle.textContent = `${latest.emoji} คืน ${latest.name} สำเร็จ`;
+    shortcutSub.textContent = `ทำรายการล่าสุดเมื่อ ${fmt(latest.returned)}`;
+  } else {
+    shortcutTitle.textContent = "ยังไม่มีประวัติการยืม";
+    shortcutSub.textContent = "กดเพื่อดูรายละเอียดประวัติทั้งหมดของคุณ";
+  }
 }
 
 function showSuccess(icon, title, message) {

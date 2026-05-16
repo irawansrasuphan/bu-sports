@@ -114,7 +114,6 @@ body {
   box-shadow: 0 12px 30px rgba(34, 197, 94, 0.3);
 }
 
-/* ปรับแต่งความบาลานซ์ของไอคอนลูกบอลในหน้าล็อกอิน */
 .login-logo .icon-wrap i {
   display: flex;
   align-items: center;
@@ -579,7 +578,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem; /* ปรับลดเพื่อรองรับการ์ด Shortcut */
 }
 
 .action-card {
@@ -627,7 +626,23 @@ body {
   margin-top: 0.35rem;
 }
 
+/* ---------- 🆕 HISTORY SHORTCUT CARD STYLE ---------- */
+.history-shortcut-card {
+  transition: var(--transition);
+}
+
+.history-shortcut-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md) !important;
+  border-color: rgba(14, 165, 233, 0.25) !important;
+}
+
+.history-shortcut-card:hover .ti-history {
+  color: var(--secondary) !important;
+}
+
 .section-title {
+  margin-top: 2rem;
   margin-bottom: 1rem;
   font-size: 0.85rem;
   font-weight: 700;
@@ -771,6 +786,18 @@ body {
   border: 1px solid var(--gray-200);
   background: white;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--gray-700);
+  transition: var(--transition);
+}
+
+.btn-back:hover {
+  background: var(--gray-100);
+  color: var(--primary);
+  border-color: var(--gray-300);
 }
 
 .equip-grid {
@@ -1079,5 +1106,16 @@ body {
   }
   .modal-actions {
     flex-direction: row;
+  }
+
+  /* ปรับแต่ง Shortcut ในอุปกรณ์มือถือ */
+  .history-shortcut-card {
+    padding: 0.85rem !important;
+  }
+  .history-shortcut-card h4 {
+    font-size: 0.9rem !important;
+  }
+  .history-shortcut-card p {
+    font-size: 0.75rem !important;
   }
 }
