@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Firebase Realtime & Profile Persistent)
+   Sports Lending System - script.js (Complete Fixed Version)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -12,7 +12,7 @@ import {
   onValue,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// คีย์โครงการของโครงการคุณตามระบบ
+// คีย์โครงการ Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDy5woHXjPdH7816Im7MloAlbLJIi4Bdk",
   authDomain: "bu-sports-lending.firebaseapp.com",
@@ -43,7 +43,7 @@ let myHistory = [];
 let selDuration = 1;
 let modalEquip = null;
 let pendingReturnData = null;
-let isOverdueBlocked = false; // สำหรับเช็คสถานะการล็อกยืมเมื่อเกินกำหนดเวลา
+let isOverdueBlocked = false;
 
 function fmt(dateString) {
   if (!dateString) return "-";
@@ -77,17 +77,24 @@ window.goTo = function (id) {
   if (target) target.classList.add("active");
 
   if (id === "s-home") {
-    checkOverdueStatus(); // ตรวจสอบการหมดเวลาก่อนแสดงผลหน้าหลัก
+    checkOverdueStatus();
     renderMyBorrows();
-    renderHistoryShortcut(); // อัปเดตการ์ดประวัติย่อหน้าหลัก
+    renderHistoryShortcut();
     updateStats();
   }
   if (id === "s-borrow") renderEquip();
   if (id === "s-return") renderReturn();
-  if (id === "s-history") renderHistory(); // อัปเดตหน้าประวัติหลัก
+  if (id === "s-history") renderHistory();
 };
 
-/* Login System - ปรับปรุงเพื่อไม่ให้เขียนทับรูปโปรไฟล์เดิมบน Firebase */
+/* ฟังก์ชันรองรับการคลิกนอกกรอบ Modal บน HTML ของคุณ */
+window.handleOverlayClick = function (event) {
+  if (event.target.id === "borrow-modal") {
+    window.closeModal();
+  }
+};
+
+/* Login System */
 window.doLogin = async function () {
   const nameInput = document.getElementById("inp-name");
   const idInput = document.getElementById("inp-id");
@@ -105,25 +112,21 @@ window.doLogin = async function () {
 
   if (err) err.style.display = "none";
 
-  // ตรวจสอบก่อนว่าผู้ใช้นี้เคยมีข้อมูลในระบบและมีรูปภาพโปรไฟล์อยู่แล้วหรือไม่
   let existingAvatar = "";
   try {
     const snapshot = await get(ref(db, `users/${sid}/profile`));
     if (snapshot.exists()) {
       const userData = snapshot.val();
       if (userData && userData.avatar) {
-        existingAvatar = userData.avatar; // ดึงรูปภาพเดิมมาใช้งาน
+        existingAvatar = userData.avatar;
       }
     }
   } catch (e) {
-    console.error("Error fetching user profile:", e);
+    console.error(e);
   }
 
   currentUser = { name, id: sid, faculty, avatar: existingAvatar };
-
   localStorage.setItem("sportsUser", JSON.stringify(currentUser));
-
-  // บันทึกข้อมูลลงฐานข้อมูลโดยรักษารูปภาพเดิมไว้
   set(ref(db, `users/${currentUser.id}/profile`), currentUser);
 
   setupUserUI();
@@ -139,10 +142,12 @@ function loadUserFromStorage() {
 }
 
 window.askLogout = function () {
-  document.getElementById("logout-modal").classList.add("open");
+  const modal = document.getElementById("logout-modal");
+  if (modal) modal.classList.add("open");
 };
 window.closeLogoutModal = function () {
-  document.getElementById("logout-modal").classList.remove("open");
+  const modal = document.getElementById("logout-modal");
+  if (modal) modal.classList.remove("open");
 };
 
 window.doLogout = function () {
@@ -153,7 +158,6 @@ window.doLogout = function () {
   myHistory = [];
   isOverdueBlocked = false;
 
-  // รีเซ็ตการแสดงผลหน้ากากรูปภาพให้กลับเป็นตัวอักษรเริ่มต้นหลังออกจากระบบ
   const navAv = document.getElementById("nav-avatar");
   const sideAv = document.getElementById("sidebar-avatar");
   if (navAv) {
@@ -177,7 +181,6 @@ window.uploadAvatar = function (event) {
   reader.onload = function (e) {
     const base64Img = e.target.result;
     currentUser.avatar = base64Img;
-
     localStorage.setItem("sportsUser", JSON.stringify(currentUser));
 
     if (currentUser.id) {
@@ -215,20 +218,26 @@ function applyAvatarUI(imgData) {
 }
 
 window.openEditProfileModal = function () {
-  document.getElementById("edit-inp-name").value = currentUser.name;
-  document.getElementById("edit-inp-id").value = currentUser.id;
-  document.getElementById("edit-inp-faculty").value = currentUser.faculty;
-  document.getElementById("edit-profile-modal").classList.add("open");
+  const nameInp = document.getElementById("edit-inp-name");
+  const idInp = document.getElementById("edit-inp-id");
+  const facInp = document.getElementById("edit-inp-faculty");
+  const modal = document.getElementById("edit-profile-modal");
+
+  if (nameInp) nameInp.value = currentUser.name;
+  if (idInp) idInp.value = currentUser.id;
+  if (facInp) facInp.value = currentUser.faculty;
+  if (modal) modal.classList.add("open");
 };
 
 window.closeEditProfileModal = function () {
-  document.getElementById("edit-profile-modal").classList.remove("open");
+  const modal = document.getElementById("edit-profile-modal");
+  if (modal) modal.classList.remove("open");
 };
 
 window.saveEditedProfile = function () {
-  const newName = document.getElementById("edit-inp-name").value.trim();
-  const newId = document.getElementById("edit-inp-id").value.trim();
-  const newFaculty = document.getElementById("edit-inp-faculty").value;
+  const newName = document.getElementById("edit-inp-name")?.value.trim();
+  const newId = document.getElementById("edit-inp-id")?.value.trim();
+  const newFaculty = document.getElementById("edit-inp-faculty")?.value;
 
   if (!newName || !newId || newId.length < 7) {
     alert("กรุณากรอกข้อมูลให้ถูกต้อง");
@@ -271,18 +280,17 @@ function listenToFirebaseData() {
       myBorrows = data.borrows || [];
       myHistory = data.history || [];
 
-      // ปรับปรุงการดึงข้อมูลรูปภาพโปรไฟล์จากเซิร์ฟเวอร์แบบ Realtime
       if (data.profile && data.profile.avatar) {
         currentUser.avatar = data.profile.avatar;
         localStorage.setItem("sportsUser", JSON.stringify(currentUser));
         applyAvatarUI(currentUser.avatar);
       }
     }
-    checkOverdueStatus(); // ตรวจสอบสถานะการค้างส่งอุปกรณ์แบบเรียลไทม์
+    checkOverdueStatus();
     renderMyBorrows();
     renderReturn();
-    renderHistoryShortcut(); // อัปเดตประวัติแบบย่อหน้าหลัก
-    renderHistory(); // อัปเดตหน้าประวัติหลัก
+    renderHistoryShortcut();
+    renderHistory();
     updateStats();
   });
 
@@ -290,9 +298,7 @@ function listenToFirebaseData() {
     const data = snapshot.val();
     if (data) {
       EQUIP.forEach((item) => {
-        if (data[item.id] !== undefined) {
-          item.out = data[item.id];
-        }
+        if (data[item.id] !== undefined) item.out = data[item.id];
       });
       updateStats();
       renderEquip();
@@ -361,13 +367,10 @@ function renderEquip() {
 
 window.handleEquipCardClick = function (eid, avail) {
   if (avail <= 0) return;
-
-  // 🚨 ตรวจสอบก่อนว่าติดสถานะ Overdue หรือไม่ ถ้าติดให้ออกและระงับการยืมทันที
   if (isOverdueBlocked) {
     window.openOverdueModal();
     return;
   }
-
   const activeCount = myBorrows.filter((b) => b.active).length;
   if (activeCount >= 1) {
     window.openLimitModal();
@@ -402,7 +405,6 @@ window.closeLimitModal = function () {
   document.getElementById("limit-modal").classList.remove("open");
 };
 
-/* 🚨 FUNCTIONS สำหรับจัดการแจ้งเตือนคืนเกินเวลา (Overdue) */
 window.openOverdueModal = function () {
   const modal = document.getElementById("overdue-modal");
   if (modal) modal.classList.add("open");
@@ -412,19 +414,11 @@ window.closeOverdueModal = function () {
   if (modal) modal.classList.remove("open");
 };
 
-// ฟังก์ชันตรวจสอบประวัติที่กำลังยืมอยู่ว่าเลยเวลากำหนดส่งคืนแล้วหรือยัง
 function checkOverdueStatus() {
   const now = new Date();
   const activeBorrows = myBorrows.filter((b) => b.active);
-
-  // ค้นหาว่ามีไอเทมไหนที่เวลาส่งคืน (returnBy) น้อยกว่าเวลาปัจจุบัน (now) หรือไม่
   const hasOverdueItem = activeBorrows.some((b) => new Date(b.returnBy) < now);
-
-  if (hasOverdueItem) {
-    isOverdueBlocked = true;
-  } else {
-    isOverdueBlocked = false;
-  }
+  isOverdueBlocked = hasOverdueItem;
 }
 
 window.selDur = function (btn, hour) {
@@ -468,19 +462,41 @@ function renderMyBorrows() {
   const now = new Date();
   container.innerHTML = active
     .map((b) => {
-      // ตรวจสอบข้อมูลรายตัวเพื่อเปลี่ยนสไตล์ badge และการสั่นแจ้งเตือนภัย
       const isOverdue = new Date(b.returnBy) < now;
-      const badgeClass = isOverdue ? "badge warn" : "badge active";
-      const badgeText = isOverdue ? "เกินเวลาคืน" : "กำลังยืม";
+      const diff = new Date(b.returnBy) - now;
+      let timeText = "";
+
+      if (diff > 0) {
+        const hrs = Math.floor(diff / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        timeText =
+          hrs > 0
+            ? `เหลือเวลา ${hrs} ชม. ${mins} นาที`
+            : `เหลือเวลา ${mins} นาที`;
+      } else {
+        const overDiff = now - new Date(b.returnBy);
+        const mins = Math.floor(overDiff / 60000);
+        timeText = `เกินเวลามาแล้ว ${mins} นาที ⚠️`;
+      }
 
       return `
-        <div class="borrow-item" style="${isOverdue ? "border-left: 4px solid var(--warning); padding-left: calc(1rem - 4px);" : ""}">
-          <div class="ball-icon" style="${isOverdue ? "background: var(--warning-light); color: var(--warning-dark); animation: shake 0.3s infinite ease-in-out alternate;" : ""}">${b.emoji}</div>
-          <div class="info">
-            <b style="${isOverdue ? "color: var(--warning-dark);" : ""}">${b.name}</b>
-            <small>กำหนดคืน: ${fmt(b.returnBy)}</small>
+        <div class="borrow-item" style="${isOverdue ? "border-left: 4px solid #ef4444;" : ""}">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span style="font-size:1.75rem;">${b.emoji}</span>
+              <div>
+                <h4 style="font-weight:600; color:#1e293b;">${b.name}</h4>
+                <p style="font-size:0.8rem; color:${isOverdue ? "#ef4444" : "#10b981"}; font-weight:500;">
+                  ${timeText}
+                </p>
+              </div>
+            </div>
+            <span class="badge ${isOverdue ? "warn" : "active"}">${isOverdue ? "เกินเวลา" : "กำลังยืม"}</span>
           </div>
-          <span class="${badgeClass}">${badgeText}</span>
+          <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px dashed #e2e8f0; font-size:0.75rem; color:#64748b; display:flex; justify-content:space-between;">
+            <span>ยืมเมื่อ: ${fmt(b.borrowed)}</span>
+            <span>กำหนดคืน: ${fmt(b.returnBy)}</span>
+          </div>
         </div>
       `;
     })
@@ -490,42 +506,47 @@ function renderMyBorrows() {
 function renderReturn() {
   const container = document.getElementById("return-list");
   if (!container) return;
-  const activeBorrows = myBorrows.filter((b) => b.active);
-  if (activeBorrows.length === 0) {
-    container.innerHTML = `<div class="empty-state" style="padding: 4rem 1rem;"><i class="ti ti-package" style="font-size: 3.5rem; opacity: 0.5;"></i><p>ไม่มีอุปกรณ์กีฬาที่ต้องคืนในขณะนี้</p></div>`;
+  const active = myBorrows.filter((b) => b.active);
+  if (active.length === 0) {
+    container.innerHTML = `<div class="empty-state"><i class="ti ti-mood-smile"></i>ไม่มีอุปกรณ์ที่ต้องคืนในขณะนี้</div>`;
     return;
   }
 
-  const now = new Date();
-  container.innerHTML = activeBorrows
-    .map((b) => {
-      const masterIndex = myBorrows.indexOf(b);
-      const isOverdue = new Date(b.returnBy) < now;
-
-      return `
-      <div class="borrow-item" style="padding: 1.25rem; margin: 1rem; background: white; border-radius: 16px; border: 1px solid ${isOverdue ? "var(--warning)" : "var(--gray-200)"}; display: flex; align-items: center; justify-content: space-between; box-shadow: ${isOverdue ? "var(--shadow-sm)" : "none"};">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <div class="ball-icon" style="${isOverdue ? "background: var(--warning-light); color: var(--warning-dark); animation: shake 0.3s infinite ease-in-out alternate;" : ""}">${b.emoji}</div>
+  container.innerHTML = active
+    .map(
+      (b, idx) => `
+      <div class="return-item-card">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <span style="font-size:1.75rem;">${b.emoji}</span>
           <div>
-            <b style="${isOverdue ? "color: var(--warning-dark);" : ""}">${b.name} ${isOverdue ? "(เกินเวลาคืน)" : ""}</b>
-            <small style="color: var(--gray-500); display:block;">กำหนดคืน: ${fmt(b.returnBy)}</small>
+            <h4 style="font-weight:600; color:#1e293b;">${b.name}</h4>
+            <p style="font-size:0.75rem; color:#64748b;">กำหนดคืน: ${fmt(b.returnBy)}</p>
           </div>
         </div>
-        <button class="btn-cancel" onclick="window.openConfirmModal('${b.id}', ${masterIndex})" style="border: 1px solid var(--danger); color: var(--danger); padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer; background: white; font-weight:600;">คืนของ</button>
+        <button class="btn-item-return" onclick="window.askReturn(${idx})">
+          <i class="ti ti-package-export"></i> คืนของ
+        </button>
       </div>
-    `;
-    })
+    `,
+    )
     .join("");
 }
 
-window.openConfirmModal = function (equipId, borrowIndex) {
-  const item = myBorrows[borrowIndex];
-  if (!item) return;
-  pendingReturnData = { equipId, borrowIndex };
-  document.getElementById("conf-emoji").textContent = item.emoji;
-  document.getElementById("conf-msg").textContent =
-    `คุณต้องการคืน ${item.name} ใช่หรือไม่?`;
-  document.getElementById("conf-execute-btn").onclick = executeReturn;
+window.askReturn = function (idx) {
+  const active = myBorrows.filter((b) => b.active);
+  pendingReturnData = active[idx];
+  if (!pendingReturnData) return;
+
+  document.getElementById("conf-emoji").textContent = pendingReturnData.emoji;
+  document.getElementById("conf-msg").innerHTML =
+    `คุณต้องการคืน <b>${pendingReturnData.name}</b> รายการนี้ใช่หรือไม่?`;
+
+  const execBtn = document.getElementById("conf-execute-btn");
+  if (execBtn) {
+    execBtn.onclick = function () {
+      window.executeReturn();
+    };
+  }
   document.getElementById("confirm-modal").classList.add("open");
 };
 
@@ -534,151 +555,117 @@ window.closeConfirmModal = function () {
   pendingReturnData = null;
 };
 
-function executeReturn() {
+window.executeReturn = function () {
   if (!pendingReturnData) return;
-  const { equipId, borrowIndex } = pendingReturnData;
-  const targetEquip = EQUIP.find((e) => e.id === equipId);
-  if (targetEquip && targetEquip.out > 0) targetEquip.out--;
 
-  if (myBorrows[borrowIndex]) {
-    myBorrows[borrowIndex].active = false;
-    myHistory.unshift({
-      ...myBorrows[borrowIndex],
-      returned: new Date().toISOString(),
-    });
+  const target = myBorrows.find(
+    (b) =>
+      b.borrowed === pendingReturnData.borrowed &&
+      b.id === pendingReturnData.id &&
+      b.active,
+  );
+
+  if (target) {
+    target.active = false;
+    target.returned = new Date().toISOString();
+
+    const eq = EQUIP.find((e) => e.id === target.id);
+    if (eq && eq.out > 0) eq.out--;
+
+    myHistory.unshift({ ...target });
+    saveOnlineData();
   }
 
-  saveOnlineData();
   window.closeConfirmModal();
+  showSuccess("🎉", "คืนอุปกรณ์สำเร็จ!", "ขอบคุณที่ส่งคืนอุปกรณ์ตรงเวลา");
+  goTo("s-home");
+};
 
-  // ทำการเช็คสถานะอีกครั้งหลังคืนของ เพื่อปลดล็อกการล็อกยืมทันทีหากไม่มีชิ้นอื่นค้างส่งอีกแล้ว
-  checkOverdueStatus();
+function renderHistoryShortcut() {
+  const title = document.getElementById("shortcut-title");
+  const sub = document.getElementById("shortcut-sub");
+  if (!title || !sub) return;
 
-  showSuccess("🎉", "คืนอุปกรณ์สำเร็จ!", `ขอบคุณที่ส่งคืนอุปกรณ์เรียบร้อยแล้ว`);
+  const active = myBorrows.filter((b) => b.active);
+  if (active.length > 0) {
+    const item = active[0];
+    const now = new Date();
+    const isOverdue = new Date(item.returnBy) < now;
+    title.innerHTML = `กำลังยืม: ${item.emoji} ${item.name}`;
+    sub.innerHTML = isOverdue
+      ? `<span style="color:#ef4444; font-weight:600;">⚠️ เกินกำหนดส่งคืนแล้ว!</span>`
+      : `ต้องคืนภายในเวลา ${fmt(item.returnBy)}`;
+  } else if (myHistory.length > 0) {
+    const last = myHistory[0];
+    title.textContent = `คืนล่าสุด: ${last.emoji} ${last.name}`;
+    sub.textContent = `เมื่อเวลา ${fmt(last.returned)}`;
+  } else {
+    title.textContent = "ประวัติการยืม-คืนของฉัน";
+    sub.textContent = "ดูรายการอุปกรณ์ทั้งหมดที่เคยส่งคืนแล้ว";
+  }
 }
 
-/* 🔄 ฟังก์ชันเรนเดอร์ข้อมูลหน้าจอประวัติการยืม-คืนหลัก (s-history) ให้รองรับการขึ้นประวัติตั้งแต่ตอนเริ่มยืม */
 function renderHistory() {
   const container = document.getElementById("history-list");
   if (!container) return;
-
-  // รวมข้อมูลกิจกรรมทั้งหมด: ทั้งรายการที่ "กำลังยืม" และ "คืนแล้ว"
-  const allActivities = [
-    ...myBorrows
-      .filter((b) => b.active)
-      .map((b) => ({ ...b, status: "borrowing" })),
-    ...myHistory.map((h) => ({ ...h, status: "returned" })),
-  ];
-
-  // เรียงลำดับตามวันที่ทำรายการล่าสุดลงไปด้านล่าง
-  allActivities.sort(
-    (a, b) =>
-      new Date(b.returned || b.borrowed) - new Date(a.returned || a.borrowed),
-  );
-
-  if (allActivities.length === 0) {
-    container.innerHTML = `<div class="empty-state" style="padding: 4rem 1rem;"><i class="ti ti-history" style="font-size: 3.5rem; opacity: 0.4;"></i><p>ยังไม่มีประวัติการทำรายการยืม-คืนอุปกรณ์กีฬา</p></div>`;
+  if (myHistory.length === 0) {
+    container.innerHTML = `<div class="empty-state"><i class="ti ti-history"></i>ยังไม่มีประวัติการยืม-คืนอุปกรณ์กีฬา</div>`;
     return;
   }
 
-  container.innerHTML = allActivities
-    .map((item) => {
-      if (item.status === "borrowing") {
-        const now = new Date();
-        const isOverdue = new Date(item.returnBy) < now;
-        return `
-          <div class="borrow-item" style="padding: 1rem 0; border-bottom: 1px solid var(--gray-100);">
-            <div class="ball-icon" style="background: var(--primary-light); color: var(--primary);">${item.emoji}</div>
-            <div class="info">
-              <b>${item.name}</b>
-              <small style="color: var(--gray-500); display: block; margin-top: 0.15rem;">ยืมเมื่อ: ${fmt(item.borrowed)}</small>
-              <small style="color: ${isOverdue ? "var(--warning-dark)" : "var(--primary-dark)"}; display: block;">กำหนดคืน: ${fmt(item.returnBy)}</small>
+  container.innerHTML = myHistory
+    .map(
+      (h) => `
+      <div class="return-item-card" style="border-left: 4px solid #10b981;">
+        <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+          <span style="font-size:1.75rem;">${h.emoji}</span>
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h4 style="font-weight:600; color:#1e293b;">${h.name}</h4>
+              <span class="badge" style="background:#e6f4ea; color:#137333;">คืนเรียบร้อย</span>
             </div>
-            <span class="badge ${isOverdue ? "warn" : "active"}">${isOverdue ? "เกินเวลาคืน" : "กำลังยืม"}</span>
+            <p style="font-size:0.75rem; color:#64748b; margin-top:0.25rem;">
+              ยืมเมื่อ: ${fmt(h.borrowed)} | คืนเมื่อ: ${fmt(h.returned)}
+            </p>
           </div>
-        `;
-      } else {
-        return `
-          <div class="borrow-item" style="padding: 1rem 0; border-bottom: 1px solid var(--gray-100);">
-            <div class="ball-icon" style="background: var(--gray-100); color: var(--gray-700);">${item.emoji}</div>
-            <div class="info">
-              <b>${item.name}</b>
-              <small style="color: var(--gray-500); display: block; margin-top: 0.15rem;">ยืมเมื่อ: ${fmt(item.borrowed)}</small>
-              <small style="color: var(--success); display: block;">คืนเมื่อ: ${fmt(item.returned)}</small>
-            </div>
-            <span class="badge" style="background: var(--gray-200); color: var(--gray-600); border-radius: 6px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">คืนแล้ว</span>
-          </div>
-        `;
-      }
-    })
+        </div>
+      </div>
+    `,
+    )
     .join("");
 }
 
-/* 🔄 ฟังก์ชันอัปเดต Widget การ์ดทางลัดประวัติหน้าแรก (history-shortcut-card) ให้เปลี่ยนสถานะแบบ Realtime */
-function renderHistoryShortcut() {
-  const shortcutTitle = document.getElementById("shortcut-title");
-  const shortcutSub = document.getElementById("shortcut-sub");
-
-  if (!shortcutTitle || !shortcutSub) return;
-
-  const activeBorrows = myBorrows.filter((b) => b.active);
-
-  if (activeBorrows.length > 0) {
-    const latestBorrow = activeBorrows[0];
-    shortcutTitle.textContent = `${latestBorrow.emoji} กำลังยืม ${latestBorrow.name}`;
-    shortcutSub.textContent = `กำหนดส่งคืนเวลา ${fmt(latestBorrow.returnBy)}`;
-  } else if (myHistory.length > 0) {
-    const latestReturn = myHistory[0];
-    shortcutTitle.textContent = `${latestReturn.emoji} คืน ${latestReturn.name} สำเร็จ`;
-    shortcutSub.textContent = `ทำรายการล่าสุดเมื่อ ${fmt(latestReturn.returned)}`;
-  } else {
-    shortcutTitle.textContent = "ยังไม่มีประวัติการยืม";
-    shortcutSub.textContent = "กดเพื่อดูรายละเอียดประวัติทั้งหมดของคุณ";
-  }
-}
-
-function showSuccess(icon, title, message) {
-  document.getElementById("suc-icon").textContent = icon;
+/* SUCCESS TOAST ALERTS */
+function showSuccess(emoji, title, msg) {
+  const overlay = document.getElementById("success-overlay");
+  if (!overlay) return;
+  document.getElementById("suc-icon").textContent = emoji;
   document.getElementById("suc-title").textContent = title;
-  document.getElementById("suc-msg").textContent = message;
-  document.getElementById("success-overlay").classList.add("open");
+  document.getElementById("suc-msg").textContent = msg;
+  overlay.classList.add("open");
 }
 
 window.closeSuccess = function () {
   document.getElementById("success-overlay").classList.remove("open");
-  window.goTo("s-home");
 };
 
-/* ตรวจสอบและดึงรูปภาพโปรไฟล์เมื่อรีเฟรชหน้าเว็บ + ตั้งค่าลูปอัปเดตเวลาถอยหลัง Realtime */
-window.onload = function () {
+/* ตรวจสอบเวลาทุก ๆ 10 วินาที เพื่อให้เวลานับถอยหลังขยับออกแบบอัตโนมัติ */
+setInterval(() => {
+  const currentScreen = document.querySelector(".screen.active");
+  if (currentScreen && currentScreen.id === "s-home") {
+    checkOverdueStatus();
+    renderMyBorrows();
+    renderHistoryShortcut();
+  }
+}, 10000);
+
+/* INITIALIZATION */
+document.addEventListener("DOMContentLoaded", () => {
   if (loadUserFromStorage()) {
     setupUserUI();
-
-    if (currentUser && currentUser.avatar) {
-      applyAvatarUI(currentUser.avatar);
-    }
-
     listenToFirebaseData();
-    window.goTo("s-home");
-
-    // ⏱️ สร้างระบบ Realtime Loop เช็คและอัปเดตเวลาบน UI ทุกๆ 10 วินาทีโดยไม่ต้องเปิด-ปิดหน้าจอใหม่
-    setInterval(() => {
-      const activeScreen = document.querySelector(".screen.active");
-      if (activeScreen) {
-        checkOverdueStatus(); // ตรวจสอบการค้างส่งส่งผลต่อตัวบล็อกไอเทม
-
-        // เรนเดอร์ UI ใหม่เฉพาะหน้าที่ผู้ใช้กำลังเปิดอยู่เพื่อความเสถียรและประหยัดแรม
-        if (activeScreen.id === "s-home") {
-          renderMyBorrows();
-          renderHistoryShortcut();
-        } else if (activeScreen.id === "s-return") {
-          renderReturn();
-        } else if (activeScreen.id === "s-history") {
-          renderHistory();
-        }
-      }
-    }, 10000); // ทำซ้ำอัตโนมัติทุกๆ 10,000 มิลลิวินาที (10 วินาที)
+    goTo("s-home");
   } else {
-    window.goTo("s-login");
+    goTo("s-login");
   }
-};
+});
