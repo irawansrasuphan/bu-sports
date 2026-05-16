@@ -261,11 +261,11 @@ window.saveEditedProfile = function () {
    FIREBASE REALTIME DATABASE SYNC
 ========================================================= */
 function saveOnlineData() {
-  const equipData = {};
+  const updateData = {};
   EQUIP.forEach((item) => {
-    equipData[item.id] = item.out;
+    updateData[`equipment/${item.id}/out`] = item.out;
   });
-  set(ref(db, "equipmentOut"), equipData);
+  update(ref(db), updateData);
 
   if (currentUser.id) {
     set(ref(db, `users/${currentUser.id}/borrows`), myBorrows);
@@ -294,13 +294,20 @@ function listenToFirebaseData() {
     updateStats();
   });
 
-  // ซ่อมฟังก์ชันซิงค์: คอยดึงทั้งจำนวนถูกยืม (out) และยอดคลังรวมจากแอดมินแบบเรียลไทม์เพื่อกันบั๊กบอร์ดค้าง
-  onValue(ref(db, "equipmentOut"), (snapshot) => {
+  // แก้ไขโครงสร้างการซิงค์: คอยรับฟังจาก Node "equipment" เพื่อดึงข้อมูลทั้งยอดคลังรวม (total) และจำนวนที่ถูกยืม (out) แบบเรียลไทม์
+  onValue(ref(db, "equipment"), (snapshot) => {
     const data = snapshot.val();
     if (data) {
       EQUIP.forEach((item) => {
-        if (data[item.id] !== undefined) {
-          item.out = parseInt(data[item.id]) || 0;
+        if (data[item.id]) {
+          item.total =
+            parseInt(data[item.id].total) !== undefined
+              ? parseInt(data[item.id].total)
+              : item.total;
+          item.out =
+            parseInt(data[item.id].out) !== undefined
+              ? parseInt(data[item.id].out)
+              : 0;
         }
       });
       updateStats();
