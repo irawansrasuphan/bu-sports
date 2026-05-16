@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Fully Styled & Synced)
+   Sports Lending System - script.js (Fully Styled & Multi-user Synced)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -257,22 +257,10 @@ window.saveEditedProfile = function () {
 };
 
 /* FIREBASE REALTIME REAL SYNC DATA */
-function saveOnlineData() {
-  const equipData = {};
-  EQUIP.forEach((item) => {
-    equipData[item.id] = item.out;
-  });
-  set(ref(db, "equipmentOut"), equipData);
-
-  if (currentUser.id) {
-    set(ref(db, `users/${currentUser.id}/borrows`), myBorrows);
-    set(ref(db, `users/${currentUser.id}/history`), myHistory);
-  }
-}
-
 function listenToFirebaseData() {
   if (!currentUser.id) return;
 
+  // เฝ้าดูข้อมูลสถิติของ Account ตนเอง
   onValue(ref(db, `users/${currentUser.id}`), (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -293,17 +281,23 @@ function listenToFirebaseData() {
     updateStats();
   });
 
+  // เฝ้าดูสถิติจำนวนอุปกรณ์ส่วนกลาง (เมื่อมีเพื่อนกดยืม จะซิงค์ข้อมูลลงมาแบบเรียลไทม์)
   onValue(ref(db, "equipmentOut"), (snapshot) => {
     const data = snapshot.val();
     if (data) {
       EQUIP.forEach((item) => {
         if (data[item.id] !== undefined) item.out = data[item.id];
       });
-      updateStats();
-      renderEquip();
     } else {
-      saveOnlineData();
+      // หากยังไม่มีสาขาข้อมูลนี้ ให้สร้างค่าเริ่มต้นขึ้นระบบกลางทันที
+      const initOutData = {};
+      EQUIP.forEach((item) => {
+        initOutData[item.id] = 0;
+      });
+      set(ref(db, "equipmentOut"), initOutData);
     }
+    updateStats();
+    renderEquip();
   });
 }
 
@@ -428,25 +422,46 @@ window.selDur = function (btn, hour) {
   btn.classList.add("sel");
 };
 
-window.confirmBorrow = function () {
-  if (!modalEquip || modalEquip.out >= modalEquip.total) return;
+/* [ระบบบันทึกยืมและหักสถิติส่วนกลาง] */
+window.confirmBorrow = async function () {
+  if (!modalEquip) return;
 
-  modalEquip.out++;
-  const now = new Date();
-  const returnBy = new Date(now.getTime() + selDuration * 60 * 60 * 1000);
+  try {
+    const equipRef = ref(db, `equipmentOut/${modalEquip.id}`);
+    const snapshot = await get(equipRef);
+    let currentOut = snapshot.exists() ? snapshot.val() : 0;
 
-  myBorrows.unshift({
-    id: modalEquip.id,
-    name: modalEquip.name,
-    emoji: modalEquip.emoji,
-    borrowed: now.toISOString(),
-    returnBy: returnBy.toISOString(),
-    active: true,
-  });
+    if (currentOut >= modalEquip.total) {
+      alert("ขออภัย อุปกรณ์ชิ้นนี้ถูกยืมครบจำนวนแล้วในขณะนี้");
+      window.closeModal();
+      return;
+    }
 
-  saveOnlineData();
-  window.closeModal();
-  showSuccess("✅", "ยืมสำเร็จ!", `คุณยืม ${modalEquip.name} เรียบร้อยแล้ว`);
+    currentOut++;
+    await set(equipRef, currentOut);
+
+    const now = new Date();
+    const returnBy = new Date(now.getTime() + selDuration * 60 * 60 * 1000);
+
+    myBorrows.unshift({
+      id: modalEquip.id,
+      name: modalEquip.name,
+      emoji: modalEquip.emoji,
+      borrowed: now.toISOString(),
+      returnBy: returnBy.toISOString(),
+      active: true,
+    });
+
+    if (currentUser.id) {
+      await set(ref(db, `users/${currentUser.id}/borrows`), myBorrows);
+    }
+
+    window.closeModal();
+    showSuccess("✅", "ยืมสำเร็จ!", `คุณยืม ${modalEquip.name} เรียบร้อยแล้ว`);
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาดในการยืมอุปกรณ์: ", error);
+    alert("ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง");
+  }
 };
 
 function renderMyBorrows() {
@@ -502,7 +517,7 @@ function renderMyBorrows() {
     .join("");
 }
 
-/* [แก้ไขจุดปุ่มคืนของหลุดเฟรม/เบี้ยว] ปรับโครงสร้าง HTML ให้สอดคล้องกับ CSS สไตล์หลัก */
+/* [แก้ไขจุดจัดหน้าปุ่มคืนของเบี้ยว] */
 function renderReturn() {
   const container = document.getElementById("return-list");
   if (!container) return;
@@ -555,7 +570,8 @@ window.closeConfirmModal = function () {
   pendingReturnData = null;
 };
 
-window.executeReturn = function () {
+/* [ระบบลดจำนวนอุปกรณ์กลางเมื่อคืนของ] */
+window.executeReturn = async function () {
   if (!pendingReturnData) return;
 
   const target = myBorrows.find(
@@ -569,11 +585,25 @@ window.executeReturn = function () {
     target.active = false;
     target.returned = new Date().toISOString();
 
-    const eq = EQUIP.find((e) => e.id === target.id);
-    if (eq && eq.out > 0) eq.out--;
+    try {
+      const equipRef = ref(db, `equipmentOut/${target.id}`);
+      const snapshot = await get(equipRef);
+      let currentOut = snapshot.exists() ? snapshot.val() : 0;
 
-    myHistory.unshift({ ...target });
-    saveOnlineData();
+      if (currentOut > 0) {
+        currentOut--;
+        await set(equipRef, currentOut);
+      }
+
+      myHistory.unshift({ ...target });
+
+      if (currentUser.id) {
+        await set(ref(db, `users/${currentUser.id}/borrows`), myBorrows);
+        await set(ref(db, `users/${currentUser.id}/history`), myHistory);
+      }
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการคืนอุปกรณ์: ", error);
+    }
   }
 
   window.closeConfirmModal();
@@ -605,7 +635,7 @@ function renderHistoryShortcut() {
   }
 }
 
-/* [แก้ไขจุดประวัติว่างเปล่า] เชื่อมโยงอาเรย์ประวัติการคืนยิงขึ้น Element การ์ดดีไซน์หลัก */
+/* [แก้ไขจุดหน้าประวัติว่างเปล่า] */
 function renderHistory() {
   const container = document.getElementById("history-list");
   if (!container) return;
@@ -651,7 +681,7 @@ window.closeSuccess = function () {
   document.getElementById("success-overlay").classList.remove("open");
 };
 
-/* ตรวจสอบเวลาทุก ๆ 10 วินาที */
+/* ตรวจสอบสถานะเวลาทุก 10 วินาที */
 setInterval(() => {
   const currentScreen = document.querySelector(".screen.active");
   if (currentScreen && currentScreen.id === "s-home") {
