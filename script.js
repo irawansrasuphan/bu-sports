@@ -482,7 +482,7 @@ function renderMyBorrows() {
         <div class="borrow-item" style="${isOverdue ? "border-left: 4px solid var(--danger);" : ""}">
           <div style="display:flex; width:100%; align-items:center; justify-content:space-between;">
             <div style="display:flex; align-items:center; gap:0.75rem;">
-              <span class="ball-icon">${b.emoji}</span>
+              <span style="font-size:1.75rem; display:flex; align-items:center; justify-content:center; width:45px; height:45px; background:#f1f5f9; border-radius:12px;">${b.emoji}</span>
               <div>
                 <h4 style="font-weight:600; color:var(--gray-900); font-size:1rem; margin:0;">${b.name}</h4>
                 <p style="font-size:0.8rem; color:${isOverdue ? "var(--danger-dark)" : "var(--primary)"}; font-weight:500; margin: 0.15rem 0 0 0;">
@@ -502,7 +502,7 @@ function renderMyBorrows() {
     .join("");
 }
 
-/* [แก้ไขปุ่มเบี้ยว/หลุดกรอบ] ปรับปรุงสไตล์และโครงสร้างให้ผูกกับคลาส .borrow-item ใน CSS ของคุณ */
+/* [แก้ไขจุดปุ่มคืนของหลุดเฟรม/เบี้ยว] ปรับโครงสร้าง HTML ให้สอดคล้องกับ CSS สไตล์หลัก */
 function renderReturn() {
   const container = document.getElementById("return-list");
   if (!container) return;
@@ -515,15 +515,15 @@ function renderReturn() {
   container.innerHTML = active
     .map(
       (b, idx) => `
-      <div class="borrow-item" style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 1rem;">
+      <div class="borrow-item" style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 1rem; padding: 1.25rem;">
         <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0;">
-          <span class="ball-icon">${b.emoji}</span>
+          <span style="font-size:1.75rem; display:flex; align-items:center; justify-content:center; width:45px; height:45px; background:#f1f5f9; border-radius:12px; flex-shrink:0;">${b.emoji}</span>
           <div style="min-width:0;">
             <h4 style="font-weight:600; color:var(--gray-900); font-size:1rem; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.name}</h4>
             <p style="font-size:0.75rem; color:var(--gray-500); margin:0.15rem 0 0 0;">กำหนดคืน: ${fmt(b.returnBy)}</p>
           </div>
         </div>
-        <button class="btn-execute-return" onclick="window.askReturn(${idx})" style="white-space:nowrap; flex-shrink:0; margin-left:1rem; width:auto; padding: 0.6rem 1.2rem; font-size: 0.85rem; border-radius: var(--radius-sm);">
+        <button class="btn-execute-return" onclick="window.askReturn(${idx})" style="white-space:nowrap; flex-shrink:0; margin-left:1rem; width:auto; padding: 0.6rem 1.2rem; font-size: 0.85rem; cursor:pointer; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;">
           <i class="ti ti-package-export"></i> คืนของ
         </button>
       </div>
@@ -558,7 +558,6 @@ window.closeConfirmModal = function () {
 window.executeReturn = function () {
   if (!pendingReturnData) return;
 
-  // ค้นหาตำแหน่งและอัปเดตสถานะการยืมในอาเรย์หลัก
   const target = myBorrows.find(
     (b) =>
       b.borrowed === pendingReturnData.borrowed &&
@@ -570,11 +569,9 @@ window.executeReturn = function () {
     target.active = false;
     target.returned = new Date().toISOString();
 
-    // ลดจำนวนอุปกรณ์ที่ถูกยืมออกไปในระบบ
     const eq = EQUIP.find((e) => e.id === target.id);
     if (eq && eq.out > 0) eq.out--;
 
-    // บันทึกเข้าประวัติการยืม-คืน (myHistory)
     myHistory.unshift({ ...target });
     saveOnlineData();
   }
@@ -608,7 +605,7 @@ function renderHistoryShortcut() {
   }
 }
 
-/* [แก้ไขโครงสร้างประวัติการคืน] ดึงข้อมูลจากฐานข้อมูล Firebase และปรับโครงสร้าง CSS ให้เนี๊ยบเหมือนหน้าจออื่น */
+/* [แก้ไขจุดประวัติว่างเปล่า] เชื่อมโยงอาเรย์ประวัติการคืนยิงขึ้น Element การ์ดดีไซน์หลัก */
 function renderHistory() {
   const container = document.getElementById("history-list");
   if (!container) return;
@@ -621,9 +618,9 @@ function renderHistory() {
   container.innerHTML = myHistory
     .map(
       (h) => `
-      <div class="borrow-item" style="border-left: 4px solid var(--primary); display:flex; align-items:center; justify-content:space-between; margin-bottom: 1rem;">
+      <div class="borrow-item" style="border-left: 4px solid #10b981; display:flex; align-items:center; justify-content:space-between; margin-bottom: 1rem; padding: 1.25rem;">
         <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0;">
-          <span class="ball-icon" style="background: var(--gray-100); color: var(--gray-500);">${h.emoji}</span>
+          <span style="font-size:1.75rem; display:flex; align-items:center; justify-content:center; width:45px; height:45px; background:#f1f5f9; border-radius:12px; flex-shrink:0;">${h.emoji}</span>
           <div style="flex:1; min-width:0;">
             <h4 style="font-weight:600; color:var(--gray-900); font-size:1rem; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${h.name}</h4>
             <p style="font-size:0.75rem; color:var(--gray-500); margin:0.15rem 0 0 0;">
@@ -631,8 +628,8 @@ function renderHistory() {
             </p>
           </div>
         </div>
-        <span class="badge returned" style="white-space:nowrap; flex-shrink:0; margin-left:1rem;">
-          <i class="ti ti-circle-check"></i> คืนแล้ว
+        <span class="badge" style="white-space:nowrap; flex-shrink:0; margin-left:1rem; background:#e6f4ea; color:#137333;">
+          คืนเรียบร้อย
         </span>
       </div>
     `,
