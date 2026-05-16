@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Fix Scope & Overlay Display)
+   Sports Lending System - script.js (Fix Scope & Database Write Path)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -262,6 +262,7 @@ window.saveEditedProfile = function () {
 ========================================================= */
 function saveOnlineData() {
   const updateData = {};
+  // แก้ไขพาทเขียน: บันทึกเฉพาะฟิลด์ out เข้าไปในโครงสร้างวัตถุอุปกรณ์หลักของแอดมิน
   EQUIP.forEach((item) => {
     updateData[`equipment/${item.id}/out`] = item.out;
   });
@@ -294,20 +295,18 @@ function listenToFirebaseData() {
     updateStats();
   });
 
-  // แก้ไขโครงสร้างการซิงค์: คอยรับฟังจาก Node "equipment" เพื่อดึงข้อมูลทั้งยอดคลังรวม (total) และจำนวนที่ถูกยืม (out) แบบเรียลไทม์
+  // คอยรับฟังจาก Node "equipment" เพื่อดึงข้อมูลทั้งยอดคลังรวม (total) และจำนวนที่ถูกยืม (out) แบบเรียลไทม์
   onValue(ref(db, "equipment"), (snapshot) => {
     const data = snapshot.val();
     if (data) {
       EQUIP.forEach((item) => {
         if (data[item.id]) {
           item.total =
-            parseInt(data[item.id].total) !== undefined
+            data[item.id].total !== undefined
               ? parseInt(data[item.id].total)
               : item.total;
           item.out =
-            parseInt(data[item.id].out) !== undefined
-              ? parseInt(data[item.id].out)
-              : 0;
+            data[item.id].out !== undefined ? parseInt(data[item.id].out) : 0;
         }
       });
       updateStats();
@@ -521,7 +520,7 @@ function renderReturn() {
           <div class="ball-icon">${b.emoji}</div>
           <div>
             <b style="${isOverdue ? "color: var(--warning-dark);" : ""}">${b.name}</b>
-            <small style="color: var(--gray-500); display:block;">กำหนดคืน: ${fmt(b.returnBy)}</small>
+            <small style="color: var(--gray-200); display:block;">กำหนดคืน: ${fmt(b.returnBy)}</small>
           </div>
         </div>
         <button class="btn-cancel" onclick="window.openConfirmModal('${b.id}', ${masterIndex})" style="border: 1px solid var(--danger); color: var(--danger); padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer; background: white; font-weight:600;">คืนของ</button>
