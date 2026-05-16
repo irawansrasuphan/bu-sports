@@ -114,6 +114,13 @@ body {
   box-shadow: 0 12px 30px rgba(34, 197, 94, 0.3);
 }
 
+/* ปรับแต่งความบาลานซ์ของไอคอนลูกบอลในหน้าล็อกอิน */
+.login-logo .icon-wrap i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .login-logo h1 {
   font-size: 1.7rem;
   font-weight: 700;
@@ -279,7 +286,7 @@ body {
 }
 
 /* =========================================================
-   SIDEBAR MENU & PROFILE CARD (ส่วนแต่งเสริมข้อมูลโปรไฟล์)
+   SIDEBAR MENU & PROFILE CARD
 ========================================================= */
 .sidebar-overlay {
   position: fixed;
@@ -360,7 +367,6 @@ body {
   overflow-y: auto;
 }
 
-/* การตกแต่งกล่องข้อมูลผู้ใช้ตรงหัว Sidebar */
 .profile-card {
   background: linear-gradient(145deg, #ffffff, #f8fafc);
   border: 1px solid var(--gray-200);
@@ -817,7 +823,7 @@ body {
 }
 
 /* =========================================================
-   MODAL - CENTER MODE (กล่องลอยตรงกลางจอ)
+   MODAL - CENTER MODE
 ========================================================= */
 .modal-overlay {
   position: fixed;
@@ -1032,7 +1038,7 @@ body {
 }
 
 /* =========================================================
-   🚨 OVERDUE MODAL STYLE (ส่วนตกแต่งกล่องแจ้งเตือนหมดเวลาเพิ่มใหม่)
+   🚨 OVERDUE MODAL STYLE
 ========================================================= */
 #overdue-modal .modal-center-icon i {
   display: inline-block;
@@ -1040,7 +1046,6 @@ body {
   font-size: 4rem;
 }
 
-/* แอนิเมชันไอคอนสั่นเตือนภัยแบบวนลูป */
 @keyframes shake {
   0% {
     transform: rotate(-10deg) scale(1);

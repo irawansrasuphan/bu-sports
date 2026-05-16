@@ -20,7 +20,7 @@
     ></div>
     <div class="sidebar" id="sidebar-menu">
       <div class="sidebar-header">
-        <div class="brand"><i class="ti ti-trophy"></i> เมนูการใช้งาน</div>
+        <div class="brand"><i class="ti ti-ball-tennis"></i> เมนูการใช้งาน</div>
         <button class="btn-close-sidebar" onclick="toggleSidebar()">
           <i class="ti ti-x"></i>
         </button>
@@ -110,7 +110,7 @@
       <div class="login-bg-decoration"></div>
       <div class="login-card">
         <div class="login-logo">
-          <div class="icon-wrap"><i class="ti ti-trophy"></i></div>
+          <div class="icon-wrap"><i class="ti ti-ball-tennis"></i></div>
           <h1>Sports Lending System</h1>
           <p>ระบบยืม-คืนอุปกรณ์กีฬา มหาวิทยาลัยกรุงเทพ</p>
         </div>
@@ -120,7 +120,7 @@
           <input
             type="text"
             id="inp-name"
-            placeholder="เช่น ภัทรธิดา ก่อเจริญวัฒน์"
+            placeholder="เช่น สมชาย ใจดี"
             autocomplete="name"
           />
         </div>
@@ -165,7 +165,7 @@
             margin-bottom: 1rem;
           "
         >
-          กรุณากรอกข้อมูลให้ครบทุกช่อง และรหัสนักศึกษาต้องมีอย่างน้อย 7 หลัก
+          กรุณากรอกข้อมูลให้ครบทุกช่อง และรหัสนักศึกษาต้องมี 10 หลัก
         </div>
 
         <button class="btn-primary" onclick="doLogin()">
@@ -183,7 +183,9 @@
         >
           <i class="ti ti-menu-2"></i>
         </button>
-        <span class="logo"><i class="ti ti-trophy"></i> Sports Lending</span>
+        <span class="logo"
+          ><i class="ti ti-ball-tennis"></i> Sports Lending</span
+        >
         <div class="user-info">
           <span class="uname" id="nav-name">ชื่อผู้ใช้</span>
           <span class="uid" id="nav-id">รหัส</span>
@@ -256,7 +258,9 @@
         <button class="btn-hamburger" onclick="toggleSidebar()">
           <i class="ti ti-menu-2"></i>
         </button>
-        <span class="logo"><i class="ti ti-trophy"></i> Sports Lending</span>
+        <span class="logo"
+          ><i class="ti ti-ball-tennis"></i> Sports Lending</span
+        >
       </div>
 
       <div class="page-header">
@@ -274,7 +278,9 @@
         <button class="btn-hamburger" onclick="toggleSidebar()">
           <i class="ti ti-menu-2"></i>
         </button>
-        <span class="logo"><i class="ti ti-trophy"></i> Sports Lending</span>
+        <span class="logo"
+          ><i class="ti ti-ball-tennis"></i> Sports Lending</span
+        >
       </div>
 
       <div class="page-header">
@@ -380,7 +386,7 @@
     <div class="modal-overlay modal-center-mode" id="confirm-modal">
       <div class="modal-sheet confirm-sheet">
         <div class="modal-center-icon" id="conf-emoji">🏐</div>
-        <h3 id="conf-title">ยืนยันการคืนอุปกรณ์?</h3>
+        <h3>ยืนยันการคืนอุปกรณ์?</h3>
         <p id="conf-msg">คุณต้องการคืน วอลเลย์บอล รายการนี้ใช่หรือไม่?</p>
         <div class="modal-actions">
           <button class="btn-cancel flex-1" onclick="closeConfirmModal()">
