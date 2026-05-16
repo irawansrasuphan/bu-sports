@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Fully Updated Version)
+   Sports Lending System - script.js (Fully Updated & Fixed)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -26,7 +26,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ข้อมูลอุปกรณ์กีฬาเริ่มต้น (อัปเดตล่าสุด: แบดมินตัน & เทนนิส) */
+/* ข้อมูลอุปกรณ์กีฬาเริ่มต้น (อัปเดตล่าสุด) */
 let EQUIP = [
   { id: "football", name: "ลูกฟุตบอล", emoji: "⚽", total: 5, out: 0 },
   { id: "volleyball", name: "วอลเลย์บอล", emoji: "🏐", total: 5, out: 0 },
@@ -57,6 +57,7 @@ function fmt(dateString) {
 
 // ฟังก์ชันดึงอักษรแรกของชื่อกรณีไม่มีรูปโปรไฟล์
 function initials(name) {
+  if (!name) return "?";
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "?";
 }
@@ -493,7 +494,7 @@ function renderMyBorrows() {
 }
 
 /* =========================================================
-   RETURN SYSTEM
+   RETURN SYSTEM (Fixed and stable event handling)
 ========================================================= */
 function renderReturn() {
   const container = document.getElementById("return-list");
@@ -529,12 +530,13 @@ function renderReturn() {
 window.openConfirmModal = function (equipId, borrowIndex) {
   const item = myBorrows[borrowIndex];
   if (!item) return;
+
+  // บันทึกตำแหน่งและไอดีที่รอดำเนินการคืนไว้ใน State Global
   pendingReturnData = { equipId, borrowIndex };
+
   document.getElementById("conf-emoji").textContent = item.emoji;
   document.getElementById("conf-msg").textContent =
     `คุณต้องการคืน ${item.name} รายการนี้ใช่หรือไม่?`;
-
-  document.getElementById("conf-execute-btn").onclick = window.executeReturn;
 
   const modal = document.getElementById("confirm-modal");
   if (modal) modal.classList.add("open");
@@ -568,6 +570,7 @@ window.executeReturn = function () {
 
     saveOnlineData();
     window.closeConfirmModal();
+
     window.showSuccess(
       "✅",
       "คืนอุปกรณ์สำเร็จ!",
@@ -600,6 +603,12 @@ window.closeSuccess = function () {
 
 // เริ่มต้นตรวจสอบเซสชันผู้ใช้เก่าเมื่อเปิดหน้าเว็บ
 window.addEventListener("DOMContentLoaded", () => {
+  // ผูกการทำงานของปุ่มยืนยันการคืนในโมดอลผ่านโครงสร้าง DOM ที่ปลอดภัย
+  const confExecBtn = document.getElementById("conf-execute-btn");
+  if (confExecBtn) {
+    confExecBtn.addEventListener("click", window.executeReturn);
+  }
+
   const savedUser = localStorage.getItem("sportsUser");
   if (savedUser) {
     currentUser = JSON.parse(savedUser);

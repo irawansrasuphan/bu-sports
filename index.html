@@ -14,13 +14,13 @@
     <div
       class="sidebar-overlay"
       id="sidebar-overlay"
-      onclick="toggleSidebar()"
+      onclick="window.toggleSidebar()"
     ></div>
 
     <div class="sidebar" id="sidebar-menu">
       <div class="sidebar-header">
         <div class="brand"><i class="ti ti-ball-tennis"></i> เมนูการใช้งาน</div>
-        <button class="btn-close-sidebar" onclick="toggleSidebar()">
+        <button class="btn-close-sidebar" onclick="window.toggleSidebar()">
           <i class="ti ti-x"></i>
         </button>
       </div>
@@ -42,22 +42,18 @@
                 type="file"
                 id="avatar-upload"
                 accept="image/*"
-                onchange="uploadAvatar(event)"
+                onchange="window.uploadAvatar(event)"
                 style="display: none"
               />
             </div>
-            <h4 class="profile-name" id="sidebar-name">
-              นางสาวภัทรธิดา ก่อเจริญวัฒน์
-            </h4>
-            <p class="profile-id" id="sidebar-id">
-              <i class="ti ti-id"></i> 1660900076
-            </p>
+            <h4 class="profile-name" id="sidebar-name">-</h4>
+            <p class="profile-id" id="sidebar-id"><i class="ti ti-id"></i> -</p>
             <p class="profile-faculty" id="sidebar-faculty">
-              <i class="ti ti-school"></i> คณะเทคโนโลยีสารสนเทศ
+              <i class="ti ti-school"></i> -
             </p>
             <button
               class="btn-edit-profile-info"
-              onclick="openEditProfileModal()"
+              onclick="window.openEditProfileModal()"
             >
               <i class="ti ti-edit"></i> แก้ไขข้อมูล
             </button>
@@ -69,8 +65,8 @@
           <a
             class="menu-item"
             onclick="
-              toggleSidebar();
-              goTo('s-home');
+              window.toggleSidebar();
+              window.goTo('s-home');
             "
           >
             <i class="ti ti-home"></i> หน้าแรก
@@ -96,8 +92,8 @@
         <button
           class="btn-sidebar-logout"
           onclick="
-            toggleSidebar();
-            askLogout();
+            window.toggleSidebar();
+            window.askLogout();
           "
         >
           <i class="ti ti-logout"></i> ออกจากระบบ
@@ -115,7 +111,7 @@
         </div>
 
         <div class="field">
-          <label>ชื่อจริง - นามสกุล</label>
+          <label for="inp-name">ชื่อจริง - นามสกุล</label>
           <input
             type="text"
             id="inp-name"
@@ -125,7 +121,7 @@
         </div>
 
         <div class="field">
-          <label>รหัสนักศึกษา</label>
+          <label for="inp-id">รหัสนักศึกษา</label>
           <input
             type="text"
             id="inp-id"
@@ -136,21 +132,23 @@
         </div>
 
         <div class="field">
-          <label>คณะ</label>
+          <label for="inp-faculty">คณะ</label>
           <select id="inp-faculty">
             <option value="">-- เลือกคณะ / สาขา --</option>
-            <option>คณะเทคโนโลยีสารสนเทศ</option>
-            <option>คณะบริหารธุรกิจ</option>
-            <option>คณะนิเทศศาสตร์</option>
-            <option>คณะบัญชี</option>
-            <option>คณะนิติศาสตร์</option>
-            <option>คณะมนุษยศาสตร์</option>
-            <option>คณะการสร้างเจ้าของธุรกิจ</option>
-            <option>คณะดิจิทัลมีเดีย</option>
-            <option>คณะวิศวกรรมศาสตร์</option>
-            <option>คณะศิลปกรรมศาสตร์</option>
-            <option>คณะเศรษฐศาสตร์</option>
-            <option>BUI</option>
+            <option value="คณะเทคโนโลยีสารสนเทศ">คณะเทคโนโลยีสารสนเทศ</option>
+            <option value="คณะบริหารธุรกิจ">คณะบริหารธุรกิจ</option>
+            <option value="คณะนิเทศศาสตร์">คณะนิเทศศาสตร์</option>
+            <option value="คณะบัญชี">คณะบัญชี</option>
+            <option value="คณะนิติศาสตร์">คณะนิติศาสตร์</option>
+            <option value="คณะมนุษยศาสตร์">คณะมนุษยศาสตร์</option>
+            <option value="คณะการสร้างเจ้าของธุรกิจ">
+              คณะการสร้างเจ้าของธุรกิจ
+            </option>
+            <option value="คณะดิจิทัลมีเดีย">คณะดิจิทัลมีเดีย</option>
+            <option value="คณะวิศวกรรมศาสตร์">คณะวิศวกรรมศาสตร์</option>
+            <option value="คณะศิลปกรรมศาสตร์">คณะศิลปกรรมศาสตร์</option>
+            <option value="คณะเศรษฐศาสตร์">คณะเศรษฐศาสตร์</option>
+            <option value="BUI">BUI</option>
           </select>
         </div>
 
@@ -168,7 +166,7 @@
           หลักขึ้นไป
         </div>
 
-        <button class="btn-primary" onclick="doLogin()">
+        <button class="btn-primary" onclick="window.doLogin()">
           <i class="ti ti-login"></i> เข้าสู่ระบบ
         </button>
       </div>
@@ -178,7 +176,7 @@
       <div class="topnav">
         <button
           class="btn-hamburger"
-          onclick="toggleSidebar()"
+          onclick="window.toggleSidebar()"
           title="เปิดเมนู"
         >
           <i class="ti ti-menu-2"></i>
@@ -193,7 +191,7 @@
         <div
           class="avatar"
           id="nav-avatar"
-          onclick="toggleSidebar()"
+          onclick="window.toggleSidebar()"
           style="cursor: pointer"
           title="ดูข้อมูลส่วนตัว"
         >
@@ -208,13 +206,13 @@
         </div>
 
         <div class="action-grid">
-          <div class="action-card borrow" onclick="goTo('s-borrow')">
+          <div class="action-card borrow" onclick="window.goTo('s-borrow')">
             <div class="ic"><i class="ti ti-hand-grab"></i></div>
             <h3>ยืมอุปกรณ์</h3>
             <p>เลือกและยืมอุปกรณ์กีฬา</p>
           </div>
 
-          <div class="action-card ret" onclick="goTo('s-return')">
+          <div class="action-card ret" onclick="window.goTo('s-return')">
             <div class="ic"><i class="ti ti-package-export"></i></div>
             <h3>คืนอุปกรณ์</h3>
             <p>คืนอุปกรณ์ที่ยืมไป</p>
@@ -252,7 +250,7 @@
 
     <div id="s-borrow" class="screen">
       <div class="topnav">
-        <button class="btn-hamburger" onclick="toggleSidebar()">
+        <button class="btn-hamburger" onclick="window.toggleSidebar()">
           <i class="ti ti-menu-2"></i>
         </button>
         <span class="logo"
@@ -260,7 +258,7 @@
         >
       </div>
       <div class="page-header">
-        <button class="btn-back" onclick="goTo('s-home')">
+        <button class="btn-back" onclick="window.goTo('s-home')">
           <i class="ti ti-arrow-left"></i>
         </button>
         <h2>เลือกอุปกรณ์กีฬา</h2>
@@ -270,7 +268,7 @@
 
     <div id="s-return" class="screen">
       <div class="topnav">
-        <button class="btn-hamburger" onclick="toggleSidebar()">
+        <button class="btn-hamburger" onclick="window.toggleSidebar()">
           <i class="ti ti-menu-2"></i>
         </button>
         <span class="logo"
@@ -278,7 +276,7 @@
         >
       </div>
       <div class="page-header">
-        <button class="btn-back" onclick="goTo('s-home')">
+        <button class="btn-back" onclick="window.goTo('s-home')">
           <i class="ti ti-arrow-left"></i>
         </button>
         <h2>คืนอุปกรณ์</h2>
@@ -289,7 +287,7 @@
     <div
       class="modal-overlay"
       id="borrow-modal"
-      onclick="handleOverlayClick(event)"
+      onclick="window.handleOverlayClick(event)"
     >
       <div class="modal-sheet">
         <div class="modal-handle"></div>
@@ -305,14 +303,22 @@
         <div class="duration-pick">
           <label>ระยะเวลายืม</label>
           <div class="dur-opts">
-            <button class="dur-btn sel" onclick="selDur(this, 1)">1 ชม.</button>
-            <button class="dur-btn" onclick="selDur(this, 2)">2 ชม.</button>
-            <button class="dur-btn" onclick="selDur(this, 3)">3 ชม.</button>
+            <button class="dur-btn sel" onclick="window.selDur(this, 1)">
+              1 ชม.
+            </button>
+            <button class="dur-btn" onclick="window.selDur(this, 2)">
+              2 ชม.
+            </button>
+            <button class="dur-btn" onclick="window.selDur(this, 3)">
+              3 ชม.
+            </button>
           </div>
         </div>
         <div class="modal-actions">
-          <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
-          <button class="btn-confirm" onclick="confirmBorrow()">
+          <button class="btn-cancel" onclick="window.closeModal()">
+            ยกเลิก
+          </button>
+          <button class="btn-confirm" onclick="window.confirmBorrow()">
             ยืนยันการยืม
           </button>
         </div>
@@ -329,37 +335,42 @@
           แก้ไขข้อมูลส่วนตัว
         </h3>
         <div class="field">
-          <label>ชื่อจริง - นามสกุล</label>
+          <label for="edit-inp-name">ชื่อจริง - นามสกุล</label>
           <input type="text" id="edit-inp-name" />
         </div>
         <div class="field">
-          <label>รหัสนักศึกษา</label>
+          <label for="edit-inp-id">รหัสนักศึกษา</label>
           <input type="text" id="edit-inp-id" maxlength="10" />
         </div>
         <div class="field">
-          <label>คณะ</label>
+          <label for="edit-inp-faculty">คณะ</label>
           <select id="edit-inp-faculty">
-            <option>คณะเทคโนโลยีสารสนเทศ</option>
-            <option>คณะบริหารธุรกิจ</option>
-            <option>คณะนิเทศศาสตร์</option>
-            <option>คณะบัญชี</option>
-            <option>คณะนิติศาสตร์</option>
-            <option>คณะมนุษยศาสตร์</option>
-            <option>คณะการสร้างเจ้าของธุรกิจ</option>
-            <option>คณะดิจิทัลมีเดีย</option>
-            <option>คณะวิศวกรรมศาสตร์</option>
-            <option>คณะศิลปกรรมศาสตร์</option>
-            <option>คณะเศรษฐศาสตร์</option>
-            <option>BUI</option>
+            <option value="คณะเทคโนโลยีสารสนเทศ">คณะเทคโนโลยีสารสนเทศ</option>
+            <option value="คณะบริหารธุรกิจ">คณะบริหารธุรกิจ</option>
+            <option value="คณะนิเทศศาสตร์">คณะนิเทศศาสตร์</option>
+            <option value="คณะบัญชี">คณะบัญชี</option>
+            <option value="คณะนิติศาสตร์">คณะนิติศาสตร์</option>
+            <option value="คณะมนุษยศาสตร์">คณะมนุษยศาสตร์</option>
+            <option value="คณะการสร้างเจ้าของธุรกิจ">
+              คณะการสร้างเจ้าของธุรกิจ
+            </option>
+            <option value="คณะดิจิทัลมีเดีย">คณะดิจิทัลมีเดีย</option>
+            <option value="คณะวิศวกรรมศาสตร์">คณะวิศวกรรมศาสตร์</option>
+            <option value="คณะศิลปกรรมศาสตร์">คณะศิลปกรรมศาสตร์</option>
+            <option value="คณะเศรษฐศาสตร์">คณะเศรษฐศาสตร์</option>
+            <option value="BUI">BUI</option>
           </select>
         </div>
         <div class="modal-actions" style="margin-top: 1.5rem">
-          <button class="btn-cancel flex-1" onclick="closeEditProfileModal()">
+          <button
+            class="btn-cancel flex-1"
+            onclick="window.closeEditProfileModal()"
+          >
             ยกเลิก
           </button>
           <button
             class="btn-execute-return flex-1"
-            onclick="saveEditedProfile()"
+            onclick="window.saveEditedProfile()"
           >
             บันทึกข้อมูล
           </button>
@@ -373,7 +384,10 @@
         <h3>ยืนยันการคืนอุปกรณ์?</h3>
         <p id="conf-msg">คุณต้องการคืนอุปกรณ์รายการนี้ใช่หรือไม่?</p>
         <div class="modal-actions">
-          <button class="btn-cancel flex-1" onclick="closeConfirmModal()">
+          <button
+            class="btn-cancel flex-1"
+            onclick="window.closeConfirmModal()"
+          >
             ยกเลิก
           </button>
           <button class="btn-execute-return flex-1" id="conf-execute-btn">
@@ -389,12 +403,12 @@
         <h3>ออกจากระบบ?</h3>
         <p>คุณต้องการออกจากระบบยืมคืนอุปกรณ์กีฬาใช่หรือไม่?</p>
         <div class="modal-actions">
-          <button class="btn-cancel flex-1" onclick="closeLogoutModal()">
+          <button class="btn-cancel flex-1" onclick="window.closeLogoutModal()">
             ยกเลิก
           </button>
           <button
             class="btn-execute-return flex-1"
-            onclick="doLogout()"
+            onclick="window.doLogout()"
             style="
               background: linear-gradient(135deg, #ef4444, #dc2626);
               box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
@@ -414,7 +428,9 @@
           เนื่องจากคุณมีอุปกรณ์ค้างยืมในระบบอยู่<br />
           <b style="color: var(--danger)">กรุณาคืนอุปกรณ์กีฬาก่อนยืมอันใหม่</b>
         </p>
-        <button class="btn-warning-ok" onclick="closeLimitModal()">ตกลง</button>
+        <button class="btn-warning-ok" onclick="window.closeLimitModal()">
+          ตกลง
+        </button>
       </div>
     </div>
 
@@ -439,7 +455,7 @@
         </p>
         <button
           class="btn-execute-return"
-          onclick="closeOverdueModal()"
+          onclick="window.closeOverdueModal()"
           style="
             width: 100%;
             background: linear-gradient(135deg, #ef4444, #dc2626);
@@ -456,7 +472,7 @@
         <span class="big-icon" id="suc-icon">✅</span>
         <h3 id="suc-title">ยืมสำเร็จ!</h3>
         <p id="suc-msg">กรุณานำบัตรนักศึกษาไปแสดงที่เครื่องเพื่อรับอุปกรณ์</p>
-        <button class="btn-ok" onclick="closeSuccess()">ตกลง</button>
+        <button class="btn-ok" onclick="window.closeSuccess()">ตกลง</button>
       </div>
     </div>
 
