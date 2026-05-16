@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Fully Updated & Fixed)
+   Sports Lending System - script.js (Fix Scope & Overlay Display)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -26,7 +26,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ข้อมูลอุปกรณ์กีฬาเริ่มต้น (อัปเดตล่าสุด) */
+/* ข้อมูลอุปกรณ์กีฬาเริ่มต้น */
 let EQUIP = [
   { id: "football", name: "ลูกฟุตบอล", emoji: "⚽", total: 5, out: 0 },
   { id: "volleyball", name: "วอลเลย์บอล", emoji: "🏐", total: 5, out: 0 },
@@ -135,7 +135,7 @@ window.doLogin = async function () {
 
   setupUserUI();
   listenToFirebaseData();
-  goTo("s-home");
+  window.goTo("s-home");
 };
 
 window.askLogout = function () {
@@ -149,7 +149,7 @@ window.closeLogoutModal = function () {
 };
 
 window.doLogout = function () {
-  closeLogoutModal();
+  window.closeLogoutModal();
   localStorage.clear();
   currentUser = { name: "", id: "", faculty: "", avatar: "" };
   myBorrows = [];
@@ -167,7 +167,7 @@ window.doLogout = function () {
     sideAv.textContent = "?";
   }
 
-  goTo("s-login");
+  window.goTo("s-login");
 };
 
 /* =========================================================
@@ -252,8 +252,8 @@ window.saveEditedProfile = function () {
   set(ref(db, `users/${currentUser.id}/profile`), currentUser);
 
   setupUserUI();
-  closeEditProfileModal();
-  toggleSidebar();
+  window.closeEditProfileModal();
+  window.toggleSidebar();
   window.showSuccess("📝", "อัปเดตสำเร็จ", "แก้ไขข้อมูลเรียบร้อย");
 };
 
@@ -294,7 +294,6 @@ function listenToFirebaseData() {
     updateStats();
   });
 
-  // บล็อกดักฟังยอดการยืมจากเซิร์ฟเวอร์ และเปลี่ยนสถานะ UI ทันทีแบบ Realtime
   onValue(ref(db, "equipmentOut"), (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -333,7 +332,6 @@ function setupUserUI() {
   applyAvatarUI(currentUser.avatar);
 }
 
-// อัปเดตการ์ดสรุปจำนวนอุปกรณ์บนหน้า Dashboard
 function updateStats() {
   let sumTotal = 0;
   let sumOut = 0;
@@ -436,7 +434,6 @@ window.selDur = function (btn, hour) {
   btn.classList.add("sel");
 };
 
-// ยืนยันกระบวนการยืมอุปกรณ์กีฬา
 window.confirmBorrow = function () {
   if (!modalEquip || modalEquip.out >= modalEquip.total) return;
 
@@ -462,7 +459,6 @@ window.confirmBorrow = function () {
   );
 };
 
-// แสดงรายการยืมในหน้าหลัก Dashboard
 function renderMyBorrows() {
   const container = document.getElementById("my-borrows");
   if (!container) return;
@@ -494,7 +490,7 @@ function renderMyBorrows() {
 }
 
 /* =========================================================
-   RETURN SYSTEM (Fixed and stable event handling)
+   RETURN SYSTEM
 ========================================================= */
 function renderReturn() {
   const container = document.getElementById("return-list");
@@ -530,10 +526,7 @@ function renderReturn() {
 window.openConfirmModal = function (equipId, borrowIndex) {
   const item = myBorrows[borrowIndex];
   if (!item) return;
-
-  // บันทึกตำแหน่งและไอดีที่รอดำเนินการคืนไว้ใน State Global
   pendingReturnData = { equipId, borrowIndex };
-
   document.getElementById("conf-emoji").textContent = item.emoji;
   document.getElementById("conf-msg").textContent =
     `คุณต้องการคืน ${item.name} รายการนี้ใช่หรือไม่?`;
@@ -548,7 +541,6 @@ window.closeConfirmModal = function () {
   pendingReturnData = null;
 };
 
-// ประมวลผลและหักลบจำนวนการคืนอุปกรณ์
 window.executeReturn = function () {
   if (!pendingReturnData) return;
   const { equipId, borrowIndex } = pendingReturnData;
@@ -556,12 +548,7 @@ window.executeReturn = function () {
 
   if (item && item.active) {
     item.active = false;
-
-    // ย้ายเข้าสู่ประวัติการยืม-คืน
-    myHistory.unshift({
-      ...item,
-      returnedAt: new Date().toISOString(),
-    });
+    myHistory.unshift({ ...item, returnedAt: new Date().toISOString() });
 
     const targetEquip = EQUIP.find((e) => e.id === equipId);
     if (targetEquip && targetEquip.out > 0) {
@@ -570,7 +557,6 @@ window.executeReturn = function () {
 
     saveOnlineData();
     window.closeConfirmModal();
-
     window.showSuccess(
       "✅",
       "คืนอุปกรณ์สำเร็จ!",
@@ -584,14 +570,17 @@ window.executeReturn = function () {
 };
 
 /* =========================================================
-   GLOBAL ALERTS (SUCCESS POPUP)
+   GLOBAL ALERTS (SUCCESS POPUP OVERLAY)
 ========================================================= */
 window.showSuccess = function (emoji, title, msg) {
   const overlay = document.getElementById("success-overlay");
   if (!overlay) return;
+
   document.getElementById("suc-icon").textContent = emoji;
   document.getElementById("suc-title").textContent = title;
   document.getElementById("suc-msg").textContent = msg;
+
+  // บังคับแสดงผลโดยการเพิ่มคลาสผ่าน JavaScript ไดนามิก
   overlay.classList.add("open");
 };
 
@@ -601,12 +590,11 @@ window.closeSuccess = function () {
   window.goTo("s-home");
 };
 
-// เริ่มต้นตรวจสอบเซสชันผู้ใช้เก่าเมื่อเปิดหน้าเว็บ
+/* เริ่มทำงานเมื่อระบบพร้อม */
 window.addEventListener("DOMContentLoaded", () => {
-  // ผูกการทำงานของปุ่มยืนยันการคืนในโมดอลผ่านโครงสร้าง DOM ที่ปลอดภัย
   const confExecBtn = document.getElementById("conf-execute-btn");
   if (confExecBtn) {
-    confExecBtn.addEventListener("click", window.executeReturn);
+    confExecBtn.addEventListener("click", () => window.executeReturn());
   }
 
   const savedUser = localStorage.getItem("sportsUser");
@@ -615,5 +603,7 @@ window.addEventListener("DOMContentLoaded", () => {
     setupUserUI();
     listenToFirebaseData();
     window.goTo("s-home");
+  } else {
+    window.goTo("s-login");
   }
 });
