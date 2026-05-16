@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sports Lending System — มหาวิทยาลัยกรุงเทพ</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div
+      class="sidebar-overlay"
+      id="sidebar-overlay"
+      onclick="toggleSidebar()"
+    ></div>
+    <div class="sidebar" id="sidebar-menu">
+      <div class="sidebar-header">
+        <div class="brand"><i class="ti ti-trophy"></i> เมนูการใช้งาน</div>
+        <button class="btn-close-sidebar" onclick="toggleSidebar()">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="menu-section">
+          <p class="menu-title">ข้อมูลส่วนตัวผู้ใช้งาน</p>
+          <div class="profile-card">
+            <div class="profile-avatar-wrap">
+              <div class="avatar big-avatar" id="sidebar-avatar">AB</div>
+              <label
+                for="avatar-upload"
+                class="btn-edit-avatar"
+                title="เปลี่ยนรูปโปรไฟล์"
+              >
+                <i class="ti ti-camera"></i>
+              </label>
+              <input
+                type="file"
+                id="avatar-upload"
+                accept="image/*"
+                onchange="uploadAvatar(event)"
+                style="display: none"
+              />
+            </div>
+            <h4 class="profile-name" id="sidebar-name">
+              นางสาวภัทรธิดา ก่อเจริญวัฒน์
+            </h4>
+            <p class="profile-id" id="sidebar-id">
+              <i class="ti ti-id"></i> 1660900076
+            </p>
+            <p class="profile-faculty" id="sidebar-faculty">
+              <i class="ti ti-school"></i> คณะเทคโนโลยีสารสนเทศ
+            </p>
+            <button
+              class="btn-edit-profile-info"
+              onclick="openEditProfileModal()"
+            >
+              <i class="ti ti-edit"></i> แก้ไขข้อมูล
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <p class="menu-title">หน้าหลัก</p>
+          <a
+            class="menu-item"
+            onclick="
+              toggleSidebar();
+              goTo('s-home');
+            "
+          >
+            <i class="ti ti-home"></i> หน้าแรก
+          </a>
+        </div>
+
+        <div class="menu-section">
+          <p class="menu-title">ช่วยเหลือ & สนับสนุน</p>
+          <div class="admin-contact-card">
+            <div class="contact-header">
+              <i class="ti ti-headset"></i> ติดต่อ Admin
+            </div>
+            <p><i class="ti ti-brand-line"></i> Line: @BUsports</p>
+            <p><i class="ti ti-phone"></i> โทร: 02-407-3888 ต่อ 2500</p>
+            <p class="contact-time">
+              เวลาทำการ: จันทร์ - ศุกร์ 08:30 - 16:30 น.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button
+          class="btn-sidebar-logout"
+          onclick="
+            toggleSidebar();
+            askLogout();
+          "
+        >
+          <i class="ti ti-logout"></i> ออกจากระบบ
+        </button>
+      </div>
+    </div>
+
+    <div id="s-login" class="screen active">
+      <div class="login-bg-decoration"></div>
+      <div class="login-card">
+        <div class="login-logo">
+          <div class="icon-wrap"><i class="ti ti-trophy"></i></div>
+          <h1>Sports Lending System</h1>
+          <p>ระบบยืม-คืนอุปกรณ์กีฬา มหาวิทยาลัยกรุงเทพ</p>
+        </div>
+
+        <div class="field">
+          <label>ชื่อจริง - นามสกุล</label>
+          <input
+            type="text"
+            id="inp-name"
+            placeholder="เช่น ภัทรธิดา ก่อเจริญวัฒน์"
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="field">
+          <label>รหัสนักศึกษา</label>
+          <input
+            type="text"
+            id="inp-id"
+            placeholder="เช่น 1660900076"
+            maxlength="10"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field">
+          <label>คณะ</label>
+          <select id="inp-faculty">
+            <option value="">-- เลือกคณะ / สาขา --</option>
+            <option>คณะเทคโนโลยีสารสนเทศ</option>
+            <option>คณะบริหารธุรกิจ</option>
+            <option>คณะนิเทศศาสตร์</option>
+            <option>คณะบัญชี</option>
+            <option>คณะนิติศาสตร์</option>
+            <option>คณะมนุษยศาสตร์</option>
+            <option>คณะการสร้างเจ้าของธุรกิจ</option>
+            <option>คณะดิจิทัลมีเดีย</option>
+            <option>คณะวิศวกรรมศาสตร์</option>
+            <option>คณะศิลปกรรมศาสตร์</option>
+            <option>คณะเศรษฐศาสตร์</option>
+            <option>BUI</option>
+          </select>
+        </div>
+
+        <div
+          class="err-msg"
+          id="login-err"
+          style="
+            display: none;
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+          "
+        >
+          กรุณากรอกข้อมูลให้ครบทุกช่อง และรหัสนักศึกษาต้องมีอย่างน้อย 7 หลัก
+        </div>
+
+        <button class="btn-primary" onclick="doLogin()">
+          <i class="ti ti-login"></i> เข้าสู่ระบบ
+        </button>
+      </div>
+    </div>
+
+    <div id="s-home" class="screen">
+      <div class="topnav">
+        <button
+          class="btn-hamburger"
+          onclick="toggleSidebar()"
+          title="เปิดเมนู"
+        >
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <span class="logo"><i class="ti ti-trophy"></i> Sports Lending</span>
+        <div class="user-info">
+          <span class="uname" id="nav-name">ชื่อผู้ใช้</span>
+          <span class="uid" id="nav-id">รหัส</span>
+        </div>
+        <div
+          class="avatar"
+          id="nav-avatar"
+          onclick="toggleSidebar()"
+          style="cursor: pointer"
+          title="ดูข้อมูลส่วนตัว"
+        >
+          AB
+        </div>
+      </div>
+
+      <div class="home-body">
+        <div class="home-greeting">
+          <h2 id="greet-text">สวัสดี!</h2>
+          <p id="greet-sub">วันนี้ต้องการยืมอุปกรณ์กีฬาหรือไม่?</p>
+        </div>
+
+        <div class="action-grid">
+          <div class="action-card borrow" onclick="goTo('s-borrow')">
+            <div class="ic"><i class="ti ti-hand-grab"></i></div>
+            <h3>ยืมอุปกรณ์</h3>
+            <p>เลือกและยืมอุปกรณ์กีฬา</p>
+          </div>
+
+          <div class="action-card ret" onclick="goTo('s-return')">
+            <div class="ic">
+              <i class="ti ti-package-export"></i>
+            </div>
+            <h3>คืนอุปกรณ์</h3>
+            <p>คืนอุปกรณ์ที่ยืมไป</p>
+          </div>
+        </div>
+
+        <p class="section-title">รายการอุปกรณ์ทั้งหมด</p>
+        <div class="status-cards">
+          <div class="stat-c">
+            <div class="num" id="stat-total" style="color: var(--primary)">
+              0
+            </div>
+            <div class="lab">อุปกรณ์ทั้งหมด</div>
+          </div>
+          <div class="stat-c">
+            <div class="num" id="stat-out" style="color: var(--warning)">0</div>
+            <div class="lab">ยืมไปเท่าไหร่</div>
+          </div>
+          <div class="stat-c">
+            <div class="num" id="stat-avail" style="color: var(--secondary)">
+              0
+            </div>
+            <div class="lab">เหลือเท่าไหร่</div>
+          </div>
+        </div>
+
+        <p class="section-title" style="margin-top: 2rem">การยืมของฉัน</p>
+        <div class="current-borrow" id="my-borrows">
+          <div class="empty-state">
+            <i class="ti ti-mood-smile"></i>
+            ไม่มีอุปกรณ์ที่กำลังยืมอยู่
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="s-borrow" class="screen">
+      <div class="topnav">
+        <button class="btn-hamburger" onclick="toggleSidebar()">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <span class="logo"><i class="ti ti-trophy"></i> Sports Lending</span>
+      </div>
+
+      <div class="page-header">
+        <button class="btn-back" onclick="goTo('s-home')">
+          <i class="ti ti-arrow-left"></i>
+        </button>
+        <h2>เลือกอุปกรณ์กีฬา</h2>
+      </div>
+
+      <div class="equip-grid" id="equip-grid"></div>
+    </div>
+
+    <div id="s-return" class="screen">
+      <div class="topnav">
+        <button class="btn-hamburger" onclick="toggleSidebar()">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <span class="logo"><i class="ti ti-trophy"></i> Sports Lending</span>
+      </div>
+
+      <div class="page-header">
+        <button class="btn-back" onclick="goTo('s-home')">
+          <i class="ti ti-arrow-left"></i>
+        </button>
+        <h2>คืนอุปกรณ์</h2>
+      </div>
+
+      <div class="return-list" id="return-list"></div>
+    </div>
+
+    <div
+      class="modal-overlay"
+      id="borrow-modal"
+      onclick="handleOverlayClick(event)"
+    >
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <h3 id="modal-title">ลูกฟุตบอล</h3>
+        <p class="modal-sub">เลือกระยะเวลาการยืม (สูงสุด 3 ชั่วโมง)</p>
+        <div class="avail-big">
+          <div>
+            <div class="num-big" id="modal-avail">5</div>
+            <div class="avail-label">ชิ้น</div>
+            <div class="avail-unit">พร้อมให้ยืม</div>
+          </div>
+        </div>
+        <div class="duration-pick">
+          <label>ระยะเวลายืม</label>
+          <div class="dur-opts">
+            <button class="dur-btn sel" onclick="selDur(this, 1)">1 ชม.</button>
+            <button class="dur-btn" onclick="selDur(this, 2)">2 ชม.</button>
+            <button class="dur-btn" onclick="selDur(this, 3)">3 ชม.</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn-confirm" onclick="confirmBorrow()">
+            ยืนยันการยืม
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay modal-center-mode" id="edit-profile-modal">
+      <div
+        class="modal-sheet confirm-sheet"
+        style="text-align: left; max-width: 440px"
+      >
+        <h3 style="font-size: 1.35rem; margin-bottom: 1.25rem">
+          <i class="ti ti-user-edit" style="color: var(--primary)"></i>
+          แก้ไขข้อมูลส่วนตัว
+        </h3>
+
+        <div class="field">
+          <label>ชื่อจริง - นามสกุล</label>
+          <input type="text" id="edit-inp-name" placeholder="ชื่อ - นามสกุล" />
+        </div>
+
+        <div class="field">
+          <label>รหัสนักศึกษา</label>
+          <input
+            type="text"
+            id="edit-inp-id"
+            placeholder="รหัสนักศึกษา"
+            maxlength="10"
+          />
+        </div>
+
+        <div class="field">
+          <label>คณะ</label>
+          <select id="edit-inp-faculty">
+            <option>คณะเทคโนโลยีสารสนเทศ</option>
+            <option>คณะบริหารธุรกิจ</option>
+            <option>คณะนิเทศศาสตร์</option>
+            <option>คณะบัญชี</option>
+            <option>คณะนิติศาสตร์</option>
+            <option>คณะมนุษยศาสตร์</option>
+            <option>คณะการสร้างเจ้าของธุรกิจ</option>
+            <option>คณะดิจิทัลมีเดีย</option>
+            <option>คณะวิศวกรรมศาสตร์</option>
+            <option>คณะศิลปกรรมศาสตร์</option>
+            <option>คณะเศรษฐศาสตร์</option>
+            <option>BUI</option>
+          </select>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 1.5rem">
+          <button class="btn-cancel flex-1" onclick="closeEditProfileModal()">
+            ยกเลิก
+          </button>
+          <button
+            class="btn-execute-return flex-1"
+            onclick="saveEditedProfile()"
+          >
+            บันทึกข้อมูล
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay modal-center-mode" id="confirm-modal">
+      <div class="modal-sheet confirm-sheet">
+        <div class="modal-center-icon" id="conf-emoji">🏐</div>
+        <h3 id="conf-title">ยืนยันการคืนอุปกรณ์?</h3>
+        <p id="conf-msg">คุณต้องการคืน วอลเลย์บอล รายการนี้ใช่หรือไม่?</p>
+        <div class="modal-actions">
+          <button class="btn-cancel flex-1" onclick="closeConfirmModal()">
+            ยกเลิก
+          </button>
+          <button class="btn-execute-return flex-1" id="conf-execute-btn">
+            ยืนยันคืนของ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay modal-center-mode" id="logout-modal">
+      <div class="modal-sheet confirm-sheet">
+        <div class="modal-center-icon" style="color: var(--danger)">🚪</div>
+        <h3>ออกจากระบบ?</h3>
+        <p>คุณต้องการออกจากระบบยืมคืนอุปกรณ์กีฬาใช่หรือไม่?</p>
+        <div class="modal-actions">
+          <button class="btn-cancel flex-1" onclick="closeLogoutModal()">
+            ยกเลิก
+          </button>
+          <button
+            class="btn-execute-return flex-1"
+            onclick="doLogout()"
+            style="
+              background: linear-gradient(135deg, #ef4444, #dc2626);
+              box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+            "
+          >
+            ออกจากระบบ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay modal-center-mode" id="limit-modal">
+      <div class="modal-sheet confirm-sheet">
+        <div class="modal-center-icon">⚠️</div>
+        <h3>ไม่สามารถยืมเพิ่มได้!</h3>
+        <p>
+          เนื่องจากคุณมีอุปกรณ์ค้างยืมในระบบอยู่<br /><b
+            style="color: var(--danger)"
+            >กรุณาคืนอุปกรณ์กีฬาก่อนยืมอันใหม่</b
+          >
+        </p>
+        <button class="btn-warning-ok" onclick="closeLimitModal()">ตกลง</button>
+      </div>
+    </div>
+
+    <div class="success-overlay" id="success-overlay">
+      <div class="success-box">
+        <span class="big-icon" id="suc-icon">✅</span>
+        <h3 id="suc-title">ยืมสำเร็จ!</h3>
+        <p id="suc-msg">กรุณานำบัตรนักศึกษาไปแสดงที่เครื่องเพื่อรับอุปกรณ์</p>
+        <button class="btn-ok" onclick="closeSuccess()">ตกลง</button>
+      </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
