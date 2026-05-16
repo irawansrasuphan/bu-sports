@@ -475,9 +475,16 @@ window.closeSuccess = function () {
   window.goTo("s-home");
 };
 
+/* ฟังก์ชันตรวจสอบและดึงรูปภาพโปรไฟล์เมื่อเปิดหน้าเว็บใหม่หรือรีเฟรช */
 window.onload = function () {
   if (loadUserFromStorage()) {
     setupUserUI();
+
+    // ตรวจสอบและดึงข้อมูลภาพโปรไฟล์ล่าสุดจาก LocalStorage เพื่อให้แสดงทันทีโดยไม่ต้องรอโหลดฐานข้อมูล
+    if (currentUser && currentUser.avatar) {
+      applyAvatarUI(currentUser.avatar);
+    }
+
     listenToFirebaseData();
     window.goTo("s-home");
   } else {
