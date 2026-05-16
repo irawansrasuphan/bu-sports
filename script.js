@@ -83,8 +83,8 @@ window.goTo = function (id) {
   if (id === "s-return") renderReturn();
 };
 
-/* Login System */
-window.doLogin = function () {
+/* Login System - ปรับปรุงเพื่อไม่ให้เขียนทับรูปโปรไฟล์เดิมบน Firebase */
+window.doLogin = async function () {
   const nameInput = document.getElementById("inp-name");
   const idInput = document.getElementById("inp-id");
   const facultyInput = document.getElementById("inp-faculty");
@@ -100,10 +100,26 @@ window.doLogin = function () {
   }
 
   if (err) err.style.display = "none";
-  currentUser = { name, id: sid, faculty, avatar: "" };
+
+  // ตรวจสอบก่อนว่าผู้ใช้นี้เคยมีข้อมูลในระบบและมีรูปภาพโปรไฟล์อยู่แล้วหรือไม่
+  let existingAvatar = "";
+  try {
+    const snapshot = await get(ref(db, `users/${sid}/profile`));
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      if (userData && userData.avatar) {
+        existingAvatar = userData.avatar; // ดึงรูปภาพเดิมมาใช้งาน
+      }
+    }
+  } catch (e) {
+    console.error("Error fetching user profile:", e);
+  }
+
+  currentUser = { name, id: sid, faculty, avatar: existingAvatar };
 
   localStorage.setItem("sportsUser", JSON.stringify(currentUser));
 
+  // บันทึกข้อมูลลงฐานข้อมูลโดยรักษารูปภาพเดิมไว้
   set(ref(db, `users/${currentUser.id}/profile`), currentUser);
 
   setupUserUI();
@@ -131,6 +147,19 @@ window.doLogout = function () {
   currentUser = { name: "", id: "", faculty: "", avatar: "" };
   myBorrows = [];
   myHistory = [];
+
+  // รีเซ็ตการแสดงผลหน้ากากรูปภาพให้กลับเป็นตัวอักษรเริ่มต้นหลังออกจากระบบ
+  const navAv = document.getElementById("nav-avatar");
+  const sideAv = document.getElementById("sidebar-avatar");
+  if (navAv) {
+    navAv.style.backgroundImage = "none";
+    navAv.textContent = "?";
+  }
+  if (sideAv) {
+    sideAv.style.backgroundImage = "none";
+    sideAv.textContent = "?";
+  }
+
   goTo("s-login");
 };
 
@@ -236,8 +265,11 @@ function listenToFirebaseData() {
     if (data) {
       myBorrows = data.borrows || [];
       myHistory = data.history || [];
+
+      // ปรับปรุงการดึงข้อมูลรูปภาพโปรไฟล์จากเซิร์ฟเวอร์แบบ Realtime
       if (data.profile && data.profile.avatar) {
         currentUser.avatar = data.profile.avatar;
+        localStorage.setItem("sportsUser", JSON.stringify(currentUser));
         applyAvatarUI(currentUser.avatar);
       }
     }
@@ -475,12 +507,11 @@ window.closeSuccess = function () {
   window.goTo("s-home");
 };
 
-/* ฟังก์ชันตรวจสอบและดึงรูปภาพโปรไฟล์เมื่อเปิดหน้าเว็บใหม่หรือรีเฟรช */
+/* ตรวจสอบและดึงรูปภาพโปรไฟล์เมื่อรีเฟรชหน้าเว็บ */
 window.onload = function () {
   if (loadUserFromStorage()) {
     setupUserUI();
 
-    // ตรวจสอบและดึงข้อมูลภาพโปรไฟล์ล่าสุดจาก LocalStorage เพื่อให้แสดงทันทีโดยไม่ต้องรอโหลดฐานข้อมูล
     if (currentUser && currentUser.avatar) {
       applyAvatarUI(currentUser.avatar);
     }
