@@ -4,12 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sports Lending System — มหาวิทยาลัยกรุงเทพ</title>
-
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"
     />
-
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -18,6 +16,7 @@
       id="sidebar-overlay"
       onclick="toggleSidebar()"
     ></div>
+
     <div class="sidebar" id="sidebar-menu">
       <div class="sidebar-header">
         <div class="brand"><i class="ti ti-ball-tennis"></i> เมนูการใช้งาน</div>
@@ -31,7 +30,7 @@
           <p class="menu-title">ข้อมูลส่วนตัวผู้ใช้งาน</p>
           <div class="profile-card">
             <div class="profile-avatar-wrap">
-              <div class="avatar big-avatar" id="sidebar-avatar">AB</div>
+              <div class="avatar big-avatar" id="sidebar-avatar">?</div>
               <label
                 for="avatar-upload"
                 class="btn-edit-avatar"
@@ -165,7 +164,8 @@
             margin-bottom: 1rem;
           "
         >
-          กรุณากรอกข้อมูลให้ครบทุกช่อง และรหัสนักศึกษาต้องมี 10 หลัก
+          กรุณากรอกข้อมูลให้ครบทุกช่อง และรหัสนักศึกษาต้องมีอย่างน้อย 7
+          หลักขึ้นไป
         </div>
 
         <button class="btn-primary" onclick="doLogin()">
@@ -197,7 +197,7 @@
           style="cursor: pointer"
           title="ดูข้อมูลส่วนตัว"
         >
-          AB
+          ?
         </div>
       </div>
 
@@ -215,9 +215,7 @@
           </div>
 
           <div class="action-card ret" onclick="goTo('s-return')">
-            <div class="ic">
-              <i class="ti ti-package-export"></i>
-            </div>
+            <div class="ic"><i class="ti ti-package-export"></i></div>
             <h3>คืนอุปกรณ์</h3>
             <p>คืนอุปกรณ์ที่ยืมไป</p>
           </div>
@@ -246,8 +244,7 @@
         <p class="section-title" style="margin-top: 2rem">การยืมของฉัน</p>
         <div class="current-borrow" id="my-borrows">
           <div class="empty-state">
-            <i class="ti ti-mood-smile"></i>
-            ไม่มีอุปกรณ์ที่กำลังยืมอยู่
+            <i class="ti ti-mood-smile"></i> ไม่มีอุปกรณ์ที่กำลังยืมอยู่
           </div>
         </div>
       </div>
@@ -262,14 +259,12 @@
           ><i class="ti ti-ball-tennis"></i> Sports Lending</span
         >
       </div>
-
       <div class="page-header">
         <button class="btn-back" onclick="goTo('s-home')">
           <i class="ti ti-arrow-left"></i>
         </button>
         <h2>เลือกอุปกรณ์กีฬา</h2>
       </div>
-
       <div class="equip-grid" id="equip-grid"></div>
     </div>
 
@@ -282,14 +277,12 @@
           ><i class="ti ti-ball-tennis"></i> Sports Lending</span
         >
       </div>
-
       <div class="page-header">
         <button class="btn-back" onclick="goTo('s-home')">
           <i class="ti ti-arrow-left"></i>
         </button>
         <h2>คืนอุปกรณ์</h2>
       </div>
-
       <div class="return-list" id="return-list"></div>
     </div>
 
@@ -304,7 +297,7 @@
         <p class="modal-sub">เลือกระยะเวลาการยืม (สูงสุด 3 ชั่วโมง)</p>
         <div class="avail-big">
           <div>
-            <div class="num-big" id="modal-avail">5</div>
+            <div class="num-big" id="modal-avail">0</div>
             <div class="avail-label">ชิ้น</div>
             <div class="avail-unit">พร้อมให้ยืม</div>
           </div>
@@ -335,22 +328,14 @@
           <i class="ti ti-user-edit" style="color: var(--primary)"></i>
           แก้ไขข้อมูลส่วนตัว
         </h3>
-
         <div class="field">
           <label>ชื่อจริง - นามสกุล</label>
-          <input type="text" id="edit-inp-name" placeholder="ชื่อ - นามสกุล" />
+          <input type="text" id="edit-inp-name" />
         </div>
-
         <div class="field">
           <label>รหัสนักศึกษา</label>
-          <input
-            type="text"
-            id="edit-inp-id"
-            placeholder="รหัสนักศึกษา"
-            maxlength="10"
-          />
+          <input type="text" id="edit-inp-id" maxlength="10" />
         </div>
-
         <div class="field">
           <label>คณะ</label>
           <select id="edit-inp-faculty">
@@ -368,7 +353,6 @@
             <option>BUI</option>
           </select>
         </div>
-
         <div class="modal-actions" style="margin-top: 1.5rem">
           <button class="btn-cancel flex-1" onclick="closeEditProfileModal()">
             ยกเลิก
@@ -387,7 +371,7 @@
       <div class="modal-sheet confirm-sheet">
         <div class="modal-center-icon" id="conf-emoji">🏐</div>
         <h3>ยืนยันการคืนอุปกรณ์?</h3>
-        <p id="conf-msg">คุณต้องการคืน วอลเลย์บอล รายการนี้ใช่หรือไม่?</p>
+        <p id="conf-msg">คุณต้องการคืนอุปกรณ์รายการนี้ใช่หรือไม่?</p>
         <div class="modal-actions">
           <button class="btn-cancel flex-1" onclick="closeConfirmModal()">
             ยกเลิก
@@ -453,7 +437,7 @@
         </p>
         <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1.25rem">
           กรุณานำอุปกรณ์กีฬามาส่งคืนที่ห้องเจ้าหน้าที่พละศึกษาทันที
-          เพื่อไม่ให้ส่งผลกระทบต่อสิทธิ์การยืมในครั้งถัดไป
+          เพื่อไม่ให้ส่งผลกระทบต่อสิทธิ์ในครั้งถัดไป
         </p>
         <button
           class="btn-execute-return"
