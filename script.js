@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Fully Styled & Multi-user Synced)
+   Sports Lending System - script.js (Fully Fixed Stats Dashboard)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -323,19 +323,28 @@ function setupUserUI() {
   applyAvatarUI(currentUser.avatar);
 }
 
+/* [แก้ไขตรรกะแดชบอร์ดให้คำนวณรวมทั้งของเพื่อนและของเราอย่างแม่นยำ] */
 function updateStats() {
   let sumTotal = 0;
   let sumOut = 0;
+
+  // 1. นับจำนวนอุปกรณ์ทั้งหมด และจำนวนที่เพื่อน/คนอื่นยืมจากฐานข้อมูลกลาง
   EQUIP.forEach((e) => {
     sumTotal += e.total;
     sumOut += e.out;
   });
-  const sumAvail = sumTotal - sumOut;
+
+  // 2. ตรวจสอบว่าในสลอต 'myBorrows' ของเรา มีรายการที่ขึ้นสถานะ active (กำลังยืมอยู่) หรือไม่
+  const myActiveCount = myBorrows.filter((b) => b.active).length;
+
+  // 3. ผลรวมการยืมจริง = (ยืมจากระบบกลาง) + (จำนวนชิ้นที่เรากำลังยืม)
+  const finalOut = sumOut + myActiveCount;
+  const sumAvail = sumTotal - finalOut;
 
   if (document.getElementById("stat-total"))
     document.getElementById("stat-total").textContent = sumTotal;
   if (document.getElementById("stat-out"))
-    document.getElementById("stat-out").textContent = sumOut;
+    document.getElementById("stat-out").textContent = finalOut;
   if (document.getElementById("stat-avail"))
     document.getElementById("stat-avail").textContent = sumAvail;
 }
