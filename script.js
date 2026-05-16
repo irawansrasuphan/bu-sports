@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Complete Fixed Version)
+   Sports Lending System - script.js (Fixed History Version)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -87,7 +87,6 @@ window.goTo = function (id) {
   if (id === "s-history") renderHistory();
 };
 
-/* ฟังก์ชันรองรับการคลิกนอกกรอบ Modal บน HTML ของคุณ */
 window.handleOverlayClick = function (event) {
   if (event.target.id === "borrow-modal") {
     window.closeModal();
@@ -558,6 +557,7 @@ window.closeConfirmModal = function () {
 window.executeReturn = function () {
   if (!pendingReturnData) return;
 
+  // ค้นหาตำแหน่งและอัปเดตสถานะการยืมในอาเรย์หลัก
   const target = myBorrows.find(
     (b) =>
       b.borrowed === pendingReturnData.borrowed &&
@@ -569,9 +569,11 @@ window.executeReturn = function () {
     target.active = false;
     target.returned = new Date().toISOString();
 
+    // ลดจำนวนอุปกรณ์ที่ถูกยืมออกไปในระบบ
     const eq = EQUIP.find((e) => e.id === target.id);
     if (eq && eq.out > 0) eq.out--;
 
+    // บันทึกเข้าประวัติการยืม-คืน (myHistory)
     myHistory.unshift({ ...target });
     saveOnlineData();
   }
@@ -605,10 +607,12 @@ function renderHistoryShortcut() {
   }
 }
 
+/* [จุดแก้ไขหลัก] เปลี่ยนให้มาดึงประวัติการคืนจากอาเรย์ myHistory แทนเพื่อไม่ให้ข้อมูลหาย */
 function renderHistory() {
   const container = document.getElementById("history-list");
   if (!container) return;
-  if (myHistory.length === 0) {
+
+  if (!myHistory || myHistory.length === 0) {
     container.innerHTML = `<div class="empty-state"><i class="ti ti-history"></i>ยังไม่มีประวัติการยืม-คืนอุปกรณ์กีฬา</div>`;
     return;
   }
@@ -622,7 +626,7 @@ function renderHistory() {
           <div style="flex:1;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <h4 style="font-weight:600; color:#1e293b;">${h.name}</h4>
-              <span class="badge" style="background:#e6f4ea; color:#137333;">คืนเรียบร้อย</span>
+              <span class="badge" style="background:#e6f4ea; color:#137333; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500;">คืนเรียบร้อย</span>
             </div>
             <p style="font-size:0.75rem; color:#64748b; margin-top:0.25rem;">
               ยืมเมื่อ: ${fmt(h.borrowed)} | คืนเมื่อ: ${fmt(h.returned)}
@@ -649,7 +653,7 @@ window.closeSuccess = function () {
   document.getElementById("success-overlay").classList.remove("open");
 };
 
-/* ตรวจสอบเวลาทุก ๆ 10 วินาที เพื่อให้เวลานับถอยหลังขยับออกแบบอัตโนมัติ */
+/* ตรวจสอบเวลาทุก ๆ 10 วินาที */
 setInterval(() => {
   const currentScreen = document.querySelector(".screen.active");
   if (currentScreen && currentScreen.id === "s-home") {
