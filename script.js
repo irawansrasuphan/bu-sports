@@ -1,5 +1,5 @@
 /* =========================================================
-   Sports Lending System - script.js (Fixed History Version)
+   Sports Lending System - script.js (Fully Styled & Synced)
 ========================================================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -479,20 +479,20 @@ function renderMyBorrows() {
       }
 
       return `
-        <div class="borrow-item" style="${isOverdue ? "border-left: 4px solid #ef4444;" : ""}">
-          <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div class="borrow-item" style="${isOverdue ? "border-left: 4px solid var(--danger);" : ""}">
+          <div style="display:flex; width:100%; align-items:center; justify-content:space-between;">
             <div style="display:flex; align-items:center; gap:0.75rem;">
-              <span style="font-size:1.75rem;">${b.emoji}</span>
+              <span class="ball-icon">${b.emoji}</span>
               <div>
-                <h4 style="font-weight:600; color:#1e293b;">${b.name}</h4>
-                <p style="font-size:0.8rem; color:${isOverdue ? "#ef4444" : "#10b981"}; font-weight:500;">
+                <h4 style="font-weight:600; color:var(--gray-900); font-size:1rem; margin:0;">${b.name}</h4>
+                <p style="font-size:0.8rem; color:${isOverdue ? "var(--danger-dark)" : "var(--primary)"}; font-weight:500; margin: 0.15rem 0 0 0;">
                   ${timeText}
                 </p>
               </div>
             </div>
             <span class="badge ${isOverdue ? "warn" : "active"}">${isOverdue ? "เกินเวลา" : "กำลังยืม"}</span>
           </div>
-          <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px dashed #e2e8f0; font-size:0.75rem; color:#64748b; display:flex; justify-content:space-between;">
+          <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px dashed var(--gray-200); font-size:0.75rem; color:var(--gray-500); display:flex; justify-content:space-between; width:100%;">
             <span>ยืมเมื่อ: ${fmt(b.borrowed)}</span>
             <span>กำหนดคืน: ${fmt(b.returnBy)}</span>
           </div>
@@ -502,6 +502,7 @@ function renderMyBorrows() {
     .join("");
 }
 
+/* [แก้ไขปุ่มเบี้ยว/หลุดกรอบ] ปรับปรุงสไตล์และโครงสร้างให้ผูกกับคลาส .borrow-item ใน CSS ของคุณ */
 function renderReturn() {
   const container = document.getElementById("return-list");
   if (!container) return;
@@ -514,15 +515,15 @@ function renderReturn() {
   container.innerHTML = active
     .map(
       (b, idx) => `
-      <div class="return-item-card">
-        <div style="display:flex; align-items:center; gap:0.75rem;">
-          <span style="font-size:1.75rem;">${b.emoji}</span>
-          <div>
-            <h4 style="font-weight:600; color:#1e293b;">${b.name}</h4>
-            <p style="font-size:0.75rem; color:#64748b;">กำหนดคืน: ${fmt(b.returnBy)}</p>
+      <div class="borrow-item" style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 1rem;">
+        <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0;">
+          <span class="ball-icon">${b.emoji}</span>
+          <div style="min-width:0;">
+            <h4 style="font-weight:600; color:var(--gray-900); font-size:1rem; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.name}</h4>
+            <p style="font-size:0.75rem; color:var(--gray-500); margin:0.15rem 0 0 0;">กำหนดคืน: ${fmt(b.returnBy)}</p>
           </div>
         </div>
-        <button class="btn-item-return" onclick="window.askReturn(${idx})">
+        <button class="btn-execute-return" onclick="window.askReturn(${idx})" style="white-space:nowrap; flex-shrink:0; margin-left:1rem; width:auto; padding: 0.6rem 1.2rem; font-size: 0.85rem; border-radius: var(--radius-sm);">
           <i class="ti ti-package-export"></i> คืนของ
         </button>
       </div>
@@ -595,7 +596,7 @@ function renderHistoryShortcut() {
     const isOverdue = new Date(item.returnBy) < now;
     title.innerHTML = `กำลังยืม: ${item.emoji} ${item.name}`;
     sub.innerHTML = isOverdue
-      ? `<span style="color:#ef4444; font-weight:600;">⚠️ เกินกำหนดส่งคืนแล้ว!</span>`
+      ? `<span style="color:var(--danger); font-weight:600;">⚠️ เกินกำหนดส่งคืนแล้ว!</span>`
       : `ต้องคืนภายในเวลา ${fmt(item.returnBy)}`;
   } else if (myHistory.length > 0) {
     const last = myHistory[0];
@@ -607,7 +608,7 @@ function renderHistoryShortcut() {
   }
 }
 
-/* [จุดแก้ไขหลัก] เปลี่ยนให้มาดึงประวัติการคืนจากอาเรย์ myHistory แทนเพื่อไม่ให้ข้อมูลหาย */
+/* [แก้ไขโครงสร้างประวัติการคืน] ดึงข้อมูลจากฐานข้อมูล Firebase และปรับโครงสร้าง CSS ให้เนี๊ยบเหมือนหน้าจออื่น */
 function renderHistory() {
   const container = document.getElementById("history-list");
   if (!container) return;
@@ -620,19 +621,19 @@ function renderHistory() {
   container.innerHTML = myHistory
     .map(
       (h) => `
-      <div class="return-item-card" style="border-left: 4px solid #10b981;">
-        <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
-          <span style="font-size:1.75rem;">${h.emoji}</span>
-          <div style="flex:1;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <h4 style="font-weight:600; color:#1e293b;">${h.name}</h4>
-              <span class="badge" style="background:#e6f4ea; color:#137333; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500;">คืนเรียบร้อย</span>
-            </div>
-            <p style="font-size:0.75rem; color:#64748b; margin-top:0.25rem;">
+      <div class="borrow-item" style="border-left: 4px solid var(--primary); display:flex; align-items:center; justify-content:space-between; margin-bottom: 1rem;">
+        <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:0;">
+          <span class="ball-icon" style="background: var(--gray-100); color: var(--gray-500);">${h.emoji}</span>
+          <div style="flex:1; min-width:0;">
+            <h4 style="font-weight:600; color:var(--gray-900); font-size:1rem; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${h.name}</h4>
+            <p style="font-size:0.75rem; color:var(--gray-500); margin:0.15rem 0 0 0;">
               ยืมเมื่อ: ${fmt(h.borrowed)} | คืนเมื่อ: ${fmt(h.returned)}
             </p>
           </div>
         </div>
+        <span class="badge returned" style="white-space:nowrap; flex-shrink:0; margin-left:1rem;">
+          <i class="ti ti-circle-check"></i> คืนแล้ว
+        </span>
       </div>
     `,
     )
