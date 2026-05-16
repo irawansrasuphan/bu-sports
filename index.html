@@ -76,15 +76,6 @@
           >
             <i class="ti ti-home"></i> หน้าแรก
           </a>
-          <a
-            class="menu-item"
-            onclick="
-              toggleSidebar();
-              goTo('s-history');
-            "
-          >
-            <i class="ti ti-history"></i> ประวัติการยืม-คืน
-          </a>
         </div>
 
         <div class="menu-section">
@@ -232,52 +223,6 @@
           </div>
         </div>
 
-        <div
-          class="history-shortcut-card"
-          onclick="goTo('s-history')"
-          style="
-            background: white;
-            padding: 1rem;
-            border-radius: 16px;
-            margin-top: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 1px solid #e2e8f0;
-            cursor: pointer;
-          "
-        >
-          <div style="display: flex; align-items: center; gap: 0.75rem">
-            <div
-              style="
-                background: #f1f5f9;
-                color: #64748b;
-                width: 36px;
-                height: 36px;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.25rem;
-              "
-            >
-              <i class="ti ti-history"></i>
-            </div>
-            <div>
-              <h4
-                id="shortcut-title"
-                style="font-size: 0.95rem; font-weight: 600; color: #1e293b"
-              >
-                ประวัติการยืม-คืนของฉัน
-              </h4>
-              <p id="shortcut-sub" style="font-size: 0.8rem; color: #64748b">
-                ดูรายการอุปกรณ์ทั้งหมดที่เคยส่งคืนแล้ว
-              </p>
-            </div>
-          </div>
-          <i class="ti ti-chevron-right" style="color: #94a3b8"></i>
-        </div>
-
         <p class="section-title">รายการอุปกรณ์ทั้งหมด</p>
         <div class="status-cards">
           <div class="stat-c">
@@ -346,28 +291,6 @@
       </div>
 
       <div class="return-list" id="return-list"></div>
-    </div>
-
-    <div id="s-history" class="screen">
-      <div class="topnav">
-        <button class="btn-hamburger" onclick="toggleSidebar()">
-          <i class="ti ti-menu-2"></i>
-        </button>
-        <span class="logo"
-          ><i class="ti ti-ball-tennis"></i> Sports Lending</span
-        >
-      </div>
-
-      <div class="page-header">
-        <button class="btn-back" onclick="goTo('s-home')">
-          <i class="ti ti-arrow-left"></i>
-        </button>
-        <h2>ประวัติการยืม-คืน</h2>
-      </div>
-
-      <div class="home-body" style="padding-top: 0">
-        <div class="return-list" id="history-list"></div>
-      </div>
     </div>
 
     <div
@@ -504,7 +427,7 @@
         <div class="modal-center-icon">⚠️</div>
         <h3>ไม่สามารถยืมเพิ่มได้!</h3>
         <p>
-          เนื่องกับคุณมีอุปกรณ์ค้างยืมในระบบอยู่<br /><b
+          เนื่องจากคุณมีอุปกรณ์ค้างยืมในระบบอยู่<br /><b
             style="color: var(--danger)"
             >กรุณาคืนอุปกรณ์กีฬาก่อนยืมอันใหม่</b
           >
