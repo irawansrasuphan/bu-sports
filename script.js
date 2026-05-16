@@ -43,6 +43,7 @@ let myHistory = [];
 let selDuration = 1;
 let modalEquip = null;
 let pendingReturnData = null;
+let isOverdueBlocked = false; // สำหรับเช็คสถานะการล็อกยืมเมื่อเกินกำหนดเวลา
 
 function fmt(dateString) {
   if (!dateString) return "-";
@@ -76,6 +77,7 @@ window.goTo = function (id) {
   if (target) target.classList.add("active");
 
   if (id === "s-home") {
+    checkOverdueStatus(); // ตรวจสอบการหมดเวลาก่อนแสดงผลหน้าหลัก
     renderMyBorrows();
     updateStats();
   }
@@ -147,6 +149,7 @@ window.doLogout = function () {
   currentUser = { name: "", id: "", faculty: "", avatar: "" };
   myBorrows = [];
   myHistory = [];
+  isOverdueBlocked = false;
 
   // รีเซ็ตการแสดงผลหน้ากากรูปภาพให้กลับเป็นตัวอักษรเริ่มต้นหลังออกจากระบบ
   const navAv = document.getElementById("nav-avatar");
@@ -273,6 +276,7 @@ function listenToFirebaseData() {
         applyAvatarUI(currentUser.avatar);
       }
     }
+    checkOverdueStatus(); // ตรวจสอบสถานะการค้างส่งอุปกรณ์แบบเรียลไทม์
     renderMyBorrows();
     renderReturn();
     updateStats();
@@ -353,6 +357,13 @@ function renderEquip() {
 
 window.handleEquipCardClick = function (eid, avail) {
   if (avail <= 0) return;
+
+  // 🚨 ตรวจสอบก่อนว่าติดสถานะ Overdue หรือไม่ ถ้าติดให้ออกและระงับการยืมทันที
+  if (isOverdueBlocked) {
+    window.openOverdueModal();
+    return;
+  }
+
   const activeCount = myBorrows.filter((b) => b.active).length;
   if (activeCount >= 1) {
     window.openLimitModal();
@@ -386,6 +397,32 @@ window.openLimitModal = function () {
 window.closeLimitModal = function () {
   document.getElementById("limit-modal").classList.remove("open");
 };
+
+/* 🚨 FUNCTIONS สำหรับจัดการแจ้งเตือนคืนเกินเวลา (Overdue) */
+window.openOverdueModal = function () {
+  const modal = document.getElementById("overdue-modal");
+  if (modal) modal.classList.add("open");
+};
+window.closeOverdueModal = function () {
+  const modal = document.getElementById("overdue-modal");
+  if (modal) modal.classList.remove("open");
+};
+
+// ฟังก์ชันตรวจสอบประวัติที่กำลังยืมอยู่ว่าเลยเวลากำหนดส่งคืนแล้วหรือยัง
+function checkOverdueStatus() {
+  const now = new Date();
+  const activeBorrows = myBorrows.filter((b) => b.active);
+
+  // ค้นหาว่ามีไอเทมไหนที่เวลาส่งคืน (returnBy) น้อยกว่าเวลาปัจจุบัน (now) หรือไม่
+  const hasOverdueItem = activeBorrows.some((b) => new Date(b.returnBy) < now);
+
+  if (hasOverdueItem) {
+    isOverdueBlocked = true;
+  } else {
+    isOverdueBlocked = false;
+  }
+}
+
 window.selDur = function (btn, hour) {
   selDuration = hour;
   document
@@ -423,16 +460,26 @@ function renderMyBorrows() {
     container.innerHTML = `<div class="empty-state"><i class="ti ti-mood-smile"></i>ไม่มีอุปกรณ์ที่กำลังยืมอยู่</div>`;
     return;
   }
+
+  const now = new Date();
   container.innerHTML = active
-    .map(
-      (b) => `
-    <div class="borrow-item">
-      <div class="ball-icon">${b.emoji}</div>
-      <div class="info"><b>${b.name}</b><small>กำหนดคืน: ${fmt(b.returnBy)}</small></div>
-      <span class="badge active">กำลังยืม</span>
-    </div>
-  `,
-    )
+    .map((b) => {
+      // ตรวจสอบข้อมูลรายตัวเพื่อเปลี่ยนสไตล์ badge และการสั่นแจ้งเตือนภัย
+      const isOverdue = new Date(b.returnBy) < now;
+      const badgeClass = isOverdue ? "badge warn" : "badge active";
+      const badgeText = isOverdue ? "เกินเวลาคืน" : "กำลังยืม";
+
+      return `
+        <div class="borrow-item" style="${isOverdue ? "border-left: 4px solid var(--warning); padding-left: calc(1rem - 4px);" : ""}">
+          <div class="ball-icon" style="${isOverdue ? "background: var(--warning-light); color: var(--warning-dark); animation: shake 0.3s infinite ease-in-out alternate;" : ""}">${b.emoji}</div>
+          <div class="info">
+            <b style="${isOverdue ? "color: var(--warning-dark);" : ""}">${b.name}</b>
+            <small>กำหนดคืน: ${fmt(b.returnBy)}</small>
+          </div>
+          <span class="${badgeClass}">${badgeText}</span>
+        </div>
+      `;
+    })
     .join("");
 }
 
@@ -444,14 +491,21 @@ function renderReturn() {
     container.innerHTML = `<div class="empty-state" style="padding: 4rem 1rem;"><i class="ti ti-package" style="font-size: 3.5rem; opacity: 0.5;"></i><p>ไม่มีอุปกรณ์กีฬาที่ต้องคืนในขณะนี้</p></div>`;
     return;
   }
+
+  const now = new Date();
   container.innerHTML = activeBorrows
     .map((b) => {
       const masterIndex = myBorrows.indexOf(b);
+      const isOverdue = new Date(b.returnBy) < now;
+
       return `
-      <div class="borrow-item" style="padding: 1.25rem; margin: 1rem; background: white; border-radius: 16px; border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between;">
+      <div class="borrow-item" style="padding: 1.25rem; margin: 1rem; background: white; border-radius: 16px; border: 1px solid ${isOverdue ? "var(--warning)" : "var(--gray-200)"}; display: flex; align-items: center; justify-content: space-between; box-shadow: ${isOverdue ? "var(--shadow-sm)" : "none"};">
         <div style="display: flex; align-items: center; gap: 1rem;">
-          <div class="ball-icon">${b.emoji}</div>
-          <div><b>${b.name}</b><small style="color: var(--gray-500); display:block;">กำหนดคืน: ${fmt(b.returnBy)}</small></div>
+          <div class="ball-icon" style="${isOverdue ? "background: var(--warning-light); color: var(--warning-dark); animation: shake 0.3s infinite ease-in-out alternate;" : ""}">${b.emoji}</div>
+          <div>
+            <b style="${isOverdue ? "color: var(--warning-dark);" : ""}">${b.name} ${isOverdue ? "(เกินเวลาคืน)" : ""}</b>
+            <small style="color: var(--gray-500); display:block;">กำหนดคืน: ${fmt(b.returnBy)}</small>
+          </div>
         </div>
         <button class="btn-cancel" onclick="window.openConfirmModal('${b.id}', ${masterIndex})" style="border: 1px solid var(--danger); color: var(--danger); padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer; background: white; font-weight:600;">คืนของ</button>
       </div>
@@ -492,6 +546,10 @@ function executeReturn() {
 
   saveOnlineData();
   window.closeConfirmModal();
+
+  // ทำการเช็คสถานะอีกครั้งหลังคืนของ เพื่อปลดล็อกการล็อกยืมทันทีหากไม่มีชิ้นอื่นค้างส่งอีกแล้ว
+  checkOverdueStatus();
+
   showSuccess("🎉", "คืนอุปกรณ์สำเร็จ!", `ขอบคุณที่ส่งคืนอุปกรณ์เรียบร้อยแล้ว`);
 }
 

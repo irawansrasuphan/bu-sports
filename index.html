@@ -430,6 +430,39 @@
       </div>
     </div>
 
+    <div class="modal-overlay modal-center-mode" id="overdue-modal">
+      <div
+        class="modal-sheet confirm-sheet"
+        style="border: 2px solid var(--danger)"
+      >
+        <div
+          class="modal-center-icon"
+          style="color: var(--danger); animation: shake 0.5s infinite alternate"
+        >
+          <i class="ti ti-alarm-minus"></i>
+        </div>
+        <h3 style="color: var(--danger)">หมดเวลาการยืมแล้ว!</h3>
+        <p id="overdue-msg" style="font-weight: 500; margin-bottom: 0.5rem">
+          คุณใช้งานอุปกรณ์กีฬาเกินกำหนดเวลาที่เลือกไว้
+        </p>
+        <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1.25rem">
+          กรุณานำอุปกรณ์กีฬามาส่งคืนที่ห้องเจ้าหน้าที่พละศึกษาทันที
+          เพื่อไม่ให้ส่งผลกระทบต่อสิทธิ์การยืมในครั้งถัดไป
+        </p>
+        <button
+          class="btn-execute-return"
+          onclick="closeOverdueModal()"
+          style="
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+          "
+        >
+          รับทราบและจะไปคืนทันที
+        </button>
+      </div>
+    </div>
+
     <div class="success-overlay" id="success-overlay">
       <div class="success-box">
         <span class="big-icon" id="suc-icon">✅</span>
