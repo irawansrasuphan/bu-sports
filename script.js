@@ -79,12 +79,12 @@ window.goTo = function (id) {
   if (id === "s-home") {
     checkOverdueStatus(); // ตรวจสอบการหมดเวลาก่อนแสดงผลหน้าหลัก
     renderMyBorrows();
-    renderHistoryShortcut(); // 🆕 เรนเดอร์ข้อมูลประวัติแบบย่อในหน้าแรก
+    renderHistoryShortcut(); // อัปเดตการ์ดประวัติย่อหน้าหลัก
     updateStats();
   }
   if (id === "s-borrow") renderEquip();
   if (id === "s-return") renderReturn();
-  if (id === "s-history") renderHistory(); // 🆕 เรนเดอร์หน้าประวัติทั้งหมด
+  if (id === "s-history") renderHistory(); // อัปเดตหน้าประวัติหลัก
 };
 
 /* Login System - ปรับปรุงเพื่อไม่ให้เขียนทับรูปโปรไฟล์เดิมบน Firebase */
@@ -281,8 +281,8 @@ function listenToFirebaseData() {
     checkOverdueStatus(); // ตรวจสอบสถานะการค้างส่งอุปกรณ์แบบเรียลไทม์
     renderMyBorrows();
     renderReturn();
-    renderHistoryShortcut(); // 🆕 อัปเดตข้อมูลทางลัดประวัติหน้าแรกแบบเรียลไทม์
-    renderHistory(); // 🆕 อัปเดตข้อมูลหน้าประวัติหลักแบบเรียลไทม์
+    renderHistoryShortcut(); // อัปเดตประวัติแบบย่อหน้าหลัก
+    renderHistory(); // อัปเดตหน้าประวัติหลัก
     updateStats();
   });
 
@@ -557,44 +557,80 @@ function executeReturn() {
   showSuccess("🎉", "คืนอุปกรณ์สำเร็จ!", `ขอบคุณที่ส่งคืนอุปกรณ์เรียบร้อยแล้ว`);
 }
 
-/* 🆕 ฟังก์ชันเรนเดอร์ข้อมูลหน้าจอประวัติการยืม-คืนอุปกรณ์กีฬาหลัก (s-history) */
+/* 🔄 ฟังก์ชันเรนเดอร์ข้อมูลหน้าจอประวัติการยืม-คืนหลัก (s-history) ให้รองรับการขึ้นประวัติตั้งแต่ตอนเริ่มยืม */
 function renderHistory() {
   const container = document.getElementById("history-list");
   if (!container) return;
 
-  if (myHistory.length === 0) {
+  // รวมข้อมูลกิจกรรมทั้งหมด: ทั้งรายการที่ "กำลังยืม" และ "คืนแล้ว"
+  const allActivities = [
+    ...myBorrows
+      .filter((b) => b.active)
+      .map((b) => ({ ...b, status: "borrowing" })),
+    ...myHistory.map((h) => ({ ...h, status: "returned" })),
+  ];
+
+  // เรียงลำดับตามวันที่ทำรายการล่าสุดลงไปด้านล่าง
+  allActivities.sort(
+    (a, b) =>
+      new Date(b.returned || b.borrowed) - new Date(a.returned || a.borrowed),
+  );
+
+  if (allActivities.length === 0) {
     container.innerHTML = `<div class="empty-state" style="padding: 4rem 1rem;"><i class="ti ti-history" style="font-size: 3.5rem; opacity: 0.4;"></i><p>ยังไม่มีประวัติการทำรายการยืม-คืนอุปกรณ์กีฬา</p></div>`;
     return;
   }
 
-  container.innerHTML = myHistory
-    .map((h) => {
-      return `
-      <div class="borrow-item" style="padding: 1rem 0;">
-        <div class="ball-icon" style="background: var(--gray-100); color: var(--gray-700);">${h.emoji}</div>
-        <div class="info">
-          <b>${h.name}</b>
-          <small style="color: var(--gray-500); display: block; margin-top: 0.15rem;">ยืมเมื่อ: ${fmt(h.borrowed)}</small>
-          <small style="color: var(--primary-dark); display: block;">คืนเมื่อ: ${fmt(h.returned)}</small>
-        </div>
-        <span class="badge returned">คืนแล้ว</span>
-      </div>
-    `;
+  container.innerHTML = allActivities
+    .map((item) => {
+      if (item.status === "borrowing") {
+        const now = new Date();
+        const isOverdue = new Date(item.returnBy) < now;
+        return `
+          <div class="borrow-item" style="padding: 1rem 0; border-bottom: 1px solid var(--gray-100);">
+            <div class="ball-icon" style="background: var(--primary-light); color: var(--primary);">${item.emoji}</div>
+            <div class="info">
+              <b>${item.name}</b>
+              <small style="color: var(--gray-500); display: block; margin-top: 0.15rem;">ยืมเมื่อ: ${fmt(item.borrowed)}</small>
+              <small style="color: ${isOverdue ? "var(--warning-dark)" : "var(--primary-dark)"}; display: block;">กำหนดคืน: ${fmt(item.returnBy)}</small>
+            </div>
+            <span class="badge ${isOverdue ? "warn" : "active"}">${isOverdue ? "เกินเวลาคืน" : "กำลังยืม"}</span>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="borrow-item" style="padding: 1rem 0; border-bottom: 1px solid var(--gray-100);">
+            <div class="ball-icon" style="background: var(--gray-100); color: var(--gray-700);">${item.emoji}</div>
+            <div class="info">
+              <b>${item.name}</b>
+              <small style="color: var(--gray-500); display: block; margin-top: 0.15rem;">ยืมเมื่อ: ${fmt(item.borrowed)}</small>
+              <small style="color: var(--success); display: block;">คืนเมื่อ: ${fmt(item.returned)}</small>
+            </div>
+            <span class="badge" style="background: var(--gray-200); color: var(--gray-600); border-radius: 6px; padding: 0.25rem 0.5rem; font-size: 0.75rem;">คืนแล้ว</span>
+          </div>
+        `;
+      }
     })
     .join("");
 }
 
-/* 🆕 ฟังก์ชันอัปเดต Widget การ์ดทางลัดประวัติหน้าแรก (history-shortcut-card) */
+/* 🔄 ฟังก์ชันอัปเดต Widget การ์ดทางลัดประวัติหน้าแรก (history-shortcut-card) ให้เปลี่ยนสถานะแบบ Realtime */
 function renderHistoryShortcut() {
   const shortcutTitle = document.getElementById("shortcut-title");
   const shortcutSub = document.getElementById("shortcut-sub");
 
   if (!shortcutTitle || !shortcutSub) return;
 
-  if (myHistory.length > 0) {
-    const latest = myHistory[0];
-    shortcutTitle.textContent = `${latest.emoji} คืน ${latest.name} สำเร็จ`;
-    shortcutSub.textContent = `ทำรายการล่าสุดเมื่อ ${fmt(latest.returned)}`;
+  const activeBorrows = myBorrows.filter((b) => b.active);
+
+  if (activeBorrows.length > 0) {
+    const latestBorrow = activeBorrows[0];
+    shortcutTitle.textContent = `${latestBorrow.emoji} กำลังยืม ${latestBorrow.name}`;
+    shortcutSub.textContent = `กำหนดส่งคืนเวลา ${fmt(latestBorrow.returnBy)}`;
+  } else if (myHistory.length > 0) {
+    const latestReturn = myHistory[0];
+    shortcutTitle.textContent = `${latestReturn.emoji} คืน ${latestReturn.name} สำเร็จ`;
+    shortcutSub.textContent = `ทำรายการล่าสุดเมื่อ ${fmt(latestReturn.returned)}`;
   } else {
     shortcutTitle.textContent = "ยังไม่มีประวัติการยืม";
     shortcutSub.textContent = "กดเพื่อดูรายละเอียดประวัติทั้งหมดของคุณ";
@@ -613,7 +649,7 @@ window.closeSuccess = function () {
   window.goTo("s-home");
 };
 
-/* ตรวจสอบและดึงรูปภาพโปรไฟล์เมื่อรีเฟรชหน้าเว็บ */
+/* ตรวจสอบและดึงรูปภาพโปรไฟล์เมื่อรีเฟรชหน้าเว็บ + ตั้งค่าลูปอัปเดตเวลาถอยหลัง Realtime */
 window.onload = function () {
   if (loadUserFromStorage()) {
     setupUserUI();
@@ -624,6 +660,24 @@ window.onload = function () {
 
     listenToFirebaseData();
     window.goTo("s-home");
+
+    // ⏱️ สร้างระบบ Realtime Loop เช็คและอัปเดตเวลาบน UI ทุกๆ 10 วินาทีโดยไม่ต้องเปิด-ปิดหน้าจอใหม่
+    setInterval(() => {
+      const activeScreen = document.querySelector(".screen.active");
+      if (activeScreen) {
+        checkOverdueStatus(); // ตรวจสอบการค้างส่งส่งผลต่อตัวบล็อกไอเทม
+
+        // เรนเดอร์ UI ใหม่เฉพาะหน้าที่ผู้ใช้กำลังเปิดอยู่เพื่อความเสถียรและประหยัดแรม
+        if (activeScreen.id === "s-home") {
+          renderMyBorrows();
+          renderHistoryShortcut();
+        } else if (activeScreen.id === "s-return") {
+          renderReturn();
+        } else if (activeScreen.id === "s-history") {
+          renderHistory();
+        }
+      }
+    }, 10000); // ทำซ้ำอัตโนมัติทุกๆ 10,000 มิลลิวินาที (10 วินาที)
   } else {
     window.goTo("s-login");
   }
